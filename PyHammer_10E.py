@@ -5,6 +5,9 @@
 # Start Date: 5/31/2024                         #
 #################################################
 
+import json
+import math
+
 ### Set up constants ###
 # Probabilites, no rerolls
 P2 = 0.833
@@ -36,9 +39,39 @@ RANDOM_VALUE_AVGS = {
     'D6_PLUS_6': 9.5,
 }
 
+'''
+Available weapon keywords:
+- Rapid Fire X
+- Ignores Cover
+- Twin-linked
+- Torrent
+- Lethal Hits
+- Lance
+- Indirect Fire
+- Blast
+- Melta X
+- Heavy
+- Devastating Wounds
+- Sustained Hits
+- Anti-Keyword X+ (Infantry, Monster, Vehicle, Titanic)
+
+Available unit keywords:
+- Feel No Pain
+- Stealth
+
+'''
+
+# Global settings
+HALF_RANGE = False
+INDIRECT_PENALTY = False
+COVER = False
+
+
 class Weapon:
-    def __init__(self, name=None, attacks=None, skill=None, strength=None, AP=None, damage=None, abilities={}):
+    """ Class for defining a Weapon """
+    def __init__(self, name=None, count=None, attacks=None, skill=None, strength=None, AP=None, damage=None, abilities={}):
         self.name = name
+        self.count = count
         self.attacks = attacks
         self.skill = skill
         self.strength = strength
@@ -50,6 +83,9 @@ class Weapon:
     def update_name(self, name):
         self.name = name
     
+    def update_count(self, count):
+        self.count = count
+
     def update_attacks(self, attacks):
         if attacks in RANDOM_VALUE_AVGS.keys():
             self.attacks = RANDOM_VALUE_AVGS[attacks]
@@ -78,7 +114,7 @@ class Weapon:
 
     def update_damage(self, damage):
         if damage in RANDOM_VALUE_AVGS.keys():
-            self.damage = RANDOM_VALUE_AVGS[damage]
+            self.damage = damage
         elif damage > 0:
             self.attacks = damage
         else:
@@ -97,11 +133,27 @@ class Weapon:
     
     def clear_abilities(self):
         self.abilities.clear()
+
+    def report(self):
+        report = {
+            'Name': f'{self.name}',
+            'Attacks:': f'{self.attacks}',
+            'Skill:': f'{self.skill}',
+            'Strength:': f'{self.strength}',
+            'AP:': f'{self.AP}',
+            'Damage:': f'{self.damage}',
+            'Abilities:': f'{self.abilities}'
+        }
+        return report
+
 # End Weapon class
 
 
 class Unit:
-    def __init__(self, toughness=None, wounds=None, armor=None, invul=None, keywords={}, weapons={}):
+    """ Class defining a unit """
+    def __init__(self, name=None, model_count=None, toughness=None, wounds=None, armor=None, invul=None, keywords={}, weapons={}):
+        self.name = name
+        self.model_count = model_count
         self.toughness = toughness
         self.wounds = wounds
         self.armor = armor
@@ -110,6 +162,12 @@ class Unit:
         self.weapons = weapons
 
     # Update functions
+    def update_model_count(self, model_count):
+        if model_count > 0:
+            self.model_count = model_count
+        else:
+            print('Error: Model count must be above zero')
+
     def update_toughness(self, toughness):
         if toughness > 0:
             self.toughness = toughness
@@ -164,48 +222,254 @@ class Unit:
     
     def clear_weapons(self):
         self.weapons.clear()
+
+    def report(self):
+        weapon_list = ''
+        for weapon in self.weapons:
+            weapon_list += f'{weapon.name}, '
+        weapon_list = weapon_list[:-2]
+
+        report = {
+            'Name': f'{self.name}',
+            'Model count': f'{self.model_count}',
+            'Toughness': f'{self.toughness}',
+            'Wounds': f'{self.wounds}',
+            'Armor': f'{self.armor}',
+            'Invul': f'{self.invul}',
+            'Keywords': f'{self.keywords}',
+            'Weapons': f'{weapon_list}'
+        }
+
+        return report
 # End Unit class
 
 
 def initialize():
-    """ Set up Unit and Weapon instances """
-    pass
+    """ 
+    Set up Unit and Weapon instances
+     
+    returns - list of units
+    """
+
+    # Create weapons first
+    bolter = Weapon(name = '10x Bolter',
+                    count = 10,
+                    attacks = 1,
+                    skill = 3,
+                    strength = 4,
+                    AP = 0,
+                    damage = 1,
+                    abilities = {'RAPID FIRE 1'})
+    
+    flamer = Weapon(name = '2x Flamer',
+                    count = 2,
+                    attacks = 'D6',
+                    skill = 3,
+                    strength = 5,
+                    AP = 0,
+                    damage = 1,
+                    abilities = {'TORRENT'})
+    
+    meltagun = Weapon(name = '2x Meltagun',
+                    count = 2,
+                    attacks = 1,
+                    skill = 3,
+                    strength = 9,
+                    AP = -4,
+                    damage = 'd6',
+                    abilities = {'MELTA 2'})
+    
+    bolt_pistol = Weapon(name = '10x Bolt Pistol',
+                    count = 10,
+                    attacks = 1,
+                    skill = 3,
+                    strength = 4,
+                    AP = 0,
+                    damage = 1,
+                    abilities = {'PISTOL'})
+
+    # Create units
+    bss = Unit(name = '10xBSS',
+               model_count = 10,
+               toughness = 3,
+               wounds = 1,
+               armor = 3,
+               invul = None,
+               keywords = {'INFANTRY'},
+               weapons =  {bolter, bolt_pistol, flamer, meltagun})
+    
+
+    # Defender defaults
+    d_GEQ = Unit(name = '10x GEQ',
+               model_count = 10,
+               toughness = 3,
+               wounds = 1,
+               armor = 5,
+               invul = None,
+               keywords = {'INFANTRY'},
+               weapons =  {})
+    
+    d_MEQ = Unit(name = '5x MEQ',
+               model_count = 5,
+               toughness = 4,
+               wounds = 2,
+               armor = 3,
+               invul = None,
+               keywords = {'INFANTRY'},
+               weapons =  {})
+    
+    d_TEQ = Unit(name = '5x TEQ',
+               model_count = 5,
+               toughness = 5,
+               wounds = 3,
+               armor = 2,
+               invul = 4,
+               keywords = {'INFANTRY'},
+               weapons =  {})
+    
+    d_VEQ = Unit(name = 'VEQ',
+               model_count = 1,
+               toughness = 10,
+               wounds = 12,
+               armor = 3,
+               invul = None,
+               keywords = {'VEHICLE'},
+               weapons =  {})
+
+    # pretty_bolter = json.dumps(bolter.report(), indent=4)
+    # print(pretty_bolter)
+    # pretty_bss = json.dumps(bss.report(), indent=4)
+    # print(pretty_bss)
+
+    attacker_list = [bss]
+    defender_list = [d_GEQ, d_MEQ, d_TEQ, d_VEQ]
+
+    return attacker_list, defender_list
 # End initialize()
 
 
-def calc_hits():
+def calc_hits_avg(weapon, defender):
     """ Calculate the average number of hits """
-    pass
+
+    # TO-DO: Implement abilities
+    # RAPID FIRE X
+    # IGNORES COVER
+    # TORRENT
+    # LETHAL HITS
+    # BLAST
+    # HEAVY
+    # SUSTAINED HITS
+
+    # Convert random attacks to average
+    if weapon.attacks in RANDOM_VALUE_AVGS:
+        attacks = RANDOM_VALUE_AVGS[weapon.attacks]
+    else:
+        attacks = weapon.attacks
+
+    # Multiple attacks by number of weapons
+    attacks *= weapon.count
+
+    # Determine rerolls
+    if 'REROLL ONES HITS' in weapon.abilities:
+        rerolls = 'ONES'
+    elif 'REROLL ALL HITS' in weapon.abilities:
+        rerolls = 'ALL'
+    else:
+        rerolls = 'NONE'
+
+    if 'TORRENT' in weapon.abilities:
+        hits = attacks
+    else:
+        match rerolls:
+            case 'NONE':
+                match weapon.skill:
+                    case 2:
+                        hits = attacks * P2
+                    case 3:
+                        hits = attacks * P3
+                    case 4:
+                        hits = attacks * P4
+                    case 5:
+                        hits = attacks * P5
+                    case 6:
+                        hits = attacks * P6
+            case 'ONES':
+                match weapon.skill:
+                    case 2:
+                        hits = attacks * P2_RR1
+                    case 3:
+                        hits = attacks * P3_RR1
+                    case 4:
+                        hits = attacks * P4_RR1
+                    case 5:
+                        hits = attacks * P5_RR1
+                    case 6:
+                        hits = attacks * P6_RR1
+            case 'ALL':
+                match weapon.skill:
+                    case 2:
+                        hits = attacks * P2_RRA
+                    case 3:
+                        hits = attacks * P3_RRA
+                    case 4:
+                        hits = attacks * P4_RRA
+                    case 5:
+                        hits = attacks * P5_RRA
+                    case 6:
+                        hits = attacks * P6_RRA
+
+    return '{0:.3f}'.format(hits)
 # End calc_hits()
 
 
-def calc_wounds():
+def calc_wounds_avg():
     """ Calculate the average number of wounds """
     pass
 # End calc_wounds()
 
 
-def calc_slain():
+def calc_slain_avg():
     """ Calculate the average number of defending models slain """
     pass
 # End calc_slain()
 
 
-def report():
-    """ Print results to terminal """
+def report_avg():
+    """ Print average results to terminal """
     pass
 # End report()
 
+
 def main():
-    initialize()
+    attacker_list, defender_list = initialize()
+    results_dict = {}
 
-    calc_hits()
+    for attacker in attacker_list:
+        # print(attacker.name)
+        if attacker not in results_dict:
+            results_dict[attacker.name] = {}
 
-    calc_wounds()
+        for weapon in attacker.weapons:
+            # print(f'\t{weapon.name}')
+            if weapon not in results_dict[attacker.name]:
+                results_dict[attacker.name][weapon.name] = {}
 
-    calc_slain()
+            for defender in defender_list:
+                # print(f'\t\t{defender.name}')
+                if weapon not in results_dict[attacker.name][weapon.name]:
+                    results_dict[attacker.name][weapon.name][defender.name] = {}
 
-    report()
+                avg_hits = calc_hits_avg(weapon, defender)
+                results_dict[attacker.name][weapon.name][defender.name]['Avg Hits'] = avg_hits
+    
+                # avg_wounds = calc_wounds_avg()
+                # results_dict[attacker.name][weapon.name][defender.name]['Avg Wounds'] = avg_wounds
+
+                # avg_slain = calc_slain_avg()
+                # results_dict[attacker.name][weapon.name][defender.name]['Avg Slain'] = avg_slain
+
+    # report_avg()
+    print(json.dumps(results_dict, indent=4))
 
 
 if __name__ == '__main__':
