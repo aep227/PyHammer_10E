@@ -10,20 +10,30 @@ Ideas:
 - Add Hazardous (mostly for use with efficiency calculations)
 
 Abilities that affect the math:
+
+- indicates not added
++ indicates added but not tested
+
 Weapons:
-- Rapid Fire X
-- Ignores Cover
+Hit roll:
++ Rapid Fire X
++ Torrent
++ Lethal Hits
++ Blast
++ Heavy
++ Sustained Hits X
+
+Wound roll:
 - Twin-linked
-- Torrent
-- Lethal Hits
 - Lance
-- Indirect Fire
-- Blast
-- Melta X
-- Heavy
 - Devastating Wounds
-- Sustained Hits
 - Anti-Keyword X+ (Infantry, Monster, Vehicle, Titanic)
+
+Save roll:
+- Ignores Cover
+
+- Melta X
+- Indirect Fire
 
 Defensive:
 - Feel No Pain
