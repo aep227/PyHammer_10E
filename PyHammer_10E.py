@@ -522,9 +522,6 @@ def calc_wounds_avg(hits, lethals, weapon, defender):
     dev_wounds - the average devastating wounds inflicted by the weapon on the defender
     """
 
-# - Twin-linked
-# - Lance
-
     # Determine number of devastating wounds
     if 'DEVASTATING WOUNDS' in weapon.abilities:
         dev_wounds = hits * P6
@@ -586,9 +583,59 @@ def calc_wounds_avg(hits, lethals, weapon, defender):
 # End calc_wounds_avg()
 
 
-def calc_unsaved_avg():
-    """ Calculate the average number of unsaved wounds """
-    pass
+def calc_unsaved_avg(wounds, dev_wounds, weapon, defender):
+    """ Calculate the average number of unsaved wounds
+    
+    Arguments:
+    wounds - number of wounds from weapon
+    dev_wounds - number of devastating wounds from weapon
+    weapon - the attacking weapon
+    defender - the defending unit
+
+    Returns:
+    unsaved - the average number of unsaved wounds inflicted by the weapon on the defender
+    """
+
+    # Calculate AP-modified armor save
+    # AP is negative, subtract to add to armor number, making it worse
+    mod_armor = defender.armor - weapon.AP
+
+    # Check for cover
+    if COVER and 'IGNORES COVER' not in weapon.abilities:
+        mod_armor -= 1
+
+    # Prevent 3+ armor going to a 2+ armor in cover vs AP0
+    if defender.armor == 3 and mod_armor == 2:
+        mod_armor = 3
+
+    # Determine if AP-modified armor save is better than invulnerable save
+    if defender.invul != None and mod_armor > defender.invul:
+        save = defender.invul
+    else:
+        save = mod_armor
+    
+    # Cap save
+    if save > 7:
+        save = 7
+
+    # Determine number of unsaved wounds        
+    match save:
+        case 2:
+            unsaved = wounds * P6
+        case 3:
+            unsaved = wounds * P5
+        case 4:
+            unsaved = wounds * P4
+        case 5:
+            unsaved = wounds * P3
+        case 6:
+            unsaved = wounds * P2
+        case 7:
+            unsaved = wounds
+
+    unsaved += dev_wounds
+
+    return float('{0:.3f}'.format(unsaved))
 # End calc_unsaved_avg()
 
 
@@ -640,6 +687,9 @@ def run_all(attacker_list, defender_list):
     
                 avg_wounds, avg_dev_wounds = calc_wounds_avg(avg_hits, avg_lethals, weapon, defender)
                 results_dict[attacker.name][weapon.name][defender.name]['Avg Wounds'] = avg_wounds
+
+                avg_unsaved = calc_unsaved_avg(avg_wounds, avg_dev_wounds, weapon, defender)
+                results_dict[attacker.name][weapon.name][defender.name]['Avg Unsaved'] = avg_unsaved
 
                 # avg_slain = calc_slain_avg()
                 # results_dict[attacker.name][weapon.name][defender.name]['Avg Slain'] = avg_slain
