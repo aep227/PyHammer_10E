@@ -614,10 +614,12 @@ def create_weapon():
 # End create_weapon()
 
 
-def main():
-    attacker_list, defender_list = initialize()
-    results_dict = {}
+def run_one():
+    pass
+# End run_one()
 
+def run_all(attacker_list, defender_list):
+    results_dict = {}
     for attacker in attacker_list:
         # print(attacker.name)
         if attacker not in results_dict:
@@ -641,6 +643,15 @@ def main():
 
                 # avg_slain = calc_slain_avg()
                 # results_dict[attacker.name][weapon.name][defender.name]['Avg Slain'] = avg_slain
+
+    return results_dict
+# End run_all()
+
+
+def main():
+    attacker_list, defender_list = initialize()
+    results_dict = run_all(attacker_list, defender_list)
+
 
     # report_avg()
     print('===== Global Settings =====')
