@@ -582,7 +582,7 @@ def calc_wounds_avg(hits, lethals, weapon, defender):
     # Add lethals
     wounds += lethals
 
-    return '{0:.3f}'.format(wounds), '{0:.3f}'.format(dev_wounds)
+    return float('{0:.3f}'.format(wounds)), float('{0:.3f}'.format(dev_wounds))
 # End calc_wounds_avg()
 
 
