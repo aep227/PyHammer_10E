@@ -24,9 +24,9 @@ Hit roll:
 + Sustained Hits X
 
 Wound roll:
-- Twin-linked
-- Lance
-- Devastating Wounds
++ Twin-linked
++ Lance
++ Devastating Wounds
 - Anti-Keyword X+ (Infantry, Monster, Vehicle, Titanic)
 
 Save roll:

@@ -63,14 +63,16 @@ Available unit keywords:
 
 # Global settings
 HALF_RANGE = False
-INDIRECT_PENALTY = False
+INDIRECT = False
 COVER = False
 STATIONARY = False
+CHARGED = False
 
 
 class Weapon:
     """ Class for defining a Weapon """
-    def __init__(self, name=None, count=None, attacks=None, skill=None, strength=None, AP=None, damage=None, abilities={}):
+    def __init__(self, name=None, count=None, attacks=None, skill=None,
+                strength=None, AP=None, damage=None, abilities={}):
         self.name = name
         self.count = count
         self.attacks = attacks
@@ -124,16 +126,20 @@ class Weapon:
 
     # Ability add/remove/clear
     def add_ability(self, ability):
-        self.abilities.add(ability)
+        if ability not in self.abilities:
+            self.abilities.add(ability)
+        else:
+            print(f'Alert: {self.name} already has the {ability} ability')
 
     def remove_ability(self, ability):
         if ability in self.abilities:
             self.abilities.remove(ability)
         else:
-            print(f'Alert: {self.name} does not have the {ability} keyword')
+            print(f'Alert: {self.name} does not have the {ability} ability')
     
     def clear_abilities(self):
         self.abilities.clear()
+
 
     def report(self):
         report = {
@@ -152,13 +158,16 @@ class Weapon:
 
 class Unit:
     """ Class defining a unit """
-    def __init__(self, name=None, model_count=None, toughness=None, wounds=None, armor=None, invul=None, keywords={}, weapons={}):
+    def __init__(self, name=None, model_count=None, toughness=None,
+                 wounds=None, armor=None, invul=None, abilities={},
+                 keywords={}, weapons={}):
         self.name = name
         self.model_count = model_count
         self.toughness = toughness
         self.wounds = wounds
         self.armor = armor
         self.invul = invul
+        self.abilities = abilities
         self.keywords = keywords
         self.weapons = weapons
 
@@ -208,6 +217,23 @@ class Unit:
         self.keywords.clear()
 
 
+    # Ability add/remove/clear
+    def add_ability(self, ability):
+        if ability not in self.abilities:
+            self.abilities.add(ability)
+        else:
+            print(f'Alert: {self.name} already has the {ability} ability')
+
+    def remove_ability(self, ability):
+        if ability in self.abilities:
+            self.abilities.remove(ability)
+        else:
+            print(f'Alert: {self.name} does not have the {ability} ability')
+    
+    def clear_abilities(self):
+        self.abilities.clear()
+
+
     # Weapon add/remove/clear
     def add_weapon(self, weapon):
         if isinstance(weapon, Weapon):
@@ -223,6 +249,13 @@ class Unit:
     
     def clear_weapons(self):
         self.weapons.clear()
+
+    def add_ability(self, ability):
+            self.abilities.add(ability)
+
+    def remove_ability(self, ability):
+            self.abilities.remove(ability)
+
 
     def report(self):
         weapon_list = ''
@@ -398,11 +431,21 @@ def calc_hits_avg(weapon, defender):
             sustained = 0
     
     # Determine target number
-    mod_skill = weapon.skill
+    skill_mod = 0
     if STATIONARY == True and 'HEAVY' in weapon.abilities:
-        mod_skill -= 1
+        skill_mod -= 1
     if 'STEALTH' in defender.abilities:
-        mod_skill += 1
+        skill_mod += 1
+    if INDIRECT == True and 'INDIRECT FIRE' in weapon.abilities:
+        skill_mod += 1
+
+    # Cap skill modification to +/- 1
+    if skill_mod > 1:
+        skill_mod = 1
+    elif skill_mod < -1:
+        skill_mod = -1
+    
+    mod_skill = weapon.skill + skill_mod
 
     # Cap target number
     if mod_skill < 2:
@@ -461,7 +504,7 @@ def calc_hits_avg(weapon, defender):
                     case 6:
                         hits = attacks * P6_RRA
 
-    return '{0:.3f}'.format(hits+sustained), '{0:.3f}'.format(lethals)
+    return float('{0:.3f}'.format(hits+sustained)), float('{0:.3f}'.format(lethals))
 # End calc_hits_avg()
 
 
@@ -474,9 +517,72 @@ def calc_wounds_avg(hits, lethals, weapon, defender):
     weapon - the attacking weapon
     defender - the defending unit
 
-    Returns - wounds; the average wounds inflicted by the weapon on the defender
+    Returns:
+    wounds - the average wounds inflicted by the weapon on the defender
+    dev_wounds - the average devastating wounds inflicted by the weapon on the defender
     """
 
+# - Twin-linked
+# - Lance
+
+    # Determine number of devastating wounds
+    if 'DEVASTATING WOUNDS' in weapon.abilities:
+        dev_wounds = hits * P6
+    else:
+        dev_wounds = 0
+
+    # Determine base wound target
+    if weapon.strength >= defender.toughness*2:
+        target = 2
+    elif weapon.strength > defender.toughness and weapon.strength < (defender.toughness*2):
+        target = 3
+    elif weapon.strength == defender.toughness:
+        target = 4
+    elif weapon.strength < defender.toughness and (weapon.strength*2) > defender.toughness:
+        target = 5
+    elif (weapon.strength*2) <= defender.toughness:
+        target = 6
+
+    # Check LANCE
+    if 'LANCE' in weapon.abilities and CHARGED == True:
+        target -= 1
+
+    # Cap wound target
+    if target > 6:
+        target = 6
+    elif target < 2:
+        target = 2
+
+    # Calculate wounds
+    if 'TWIN-LINKED' in weapon.abilities:
+        match target:
+            case 2:
+                wounds = hits * P2_RRA
+            case 3:
+                wounds = hits * P3_RRA
+            case 4:
+                wounds = hits * P4_RRA
+            case 5:
+                wounds = hits * P5_RRA
+            case 6:
+                wounds = hits * P6_RRA
+    else:
+        match target:
+            case 2:
+                wounds = hits * P2
+            case 3:
+                wounds = hits * P3
+            case 4:
+                wounds = hits * P4
+            case 5:
+                wounds = hits * P5
+            case 6:
+                wounds = hits * P6
+
+    # Add lethals
+    wounds += lethals
+
+    return '{0:.3f}'.format(wounds), '{0:.3f}'.format(dev_wounds)
 # End calc_wounds_avg()
 
 
@@ -496,6 +602,16 @@ def report_avg():
     """ Print average results to terminal """
     pass
 # End report_avg()
+
+
+def create_unit():
+    pass
+# End create_unit()
+
+
+def create_weapon():
+    pass
+# End create_weapon()
 
 
 def main():
@@ -520,13 +636,19 @@ def main():
                 avg_hits, avg_lethals = calc_hits_avg(weapon, defender)
                 results_dict[attacker.name][weapon.name][defender.name]['Avg Hits'] = avg_hits
     
-                avg_wounds = calc_wounds_avg(avg_hits, avg_lethals, weapon, defender, )
-                # results_dict[attacker.name][weapon.name][defender.name]['Avg Wounds'] = avg_wounds
+                avg_wounds, avg_dev_wounds = calc_wounds_avg(avg_hits, avg_lethals, weapon, defender)
+                results_dict[attacker.name][weapon.name][defender.name]['Avg Wounds'] = avg_wounds
 
                 # avg_slain = calc_slain_avg()
                 # results_dict[attacker.name][weapon.name][defender.name]['Avg Slain'] = avg_slain
 
     # report_avg()
+    print('===== Global Settings =====')
+    print(f'Half range: {HALF_RANGE}')
+    print(f'Indirect: {INDIRECT}')
+    print(f'Cover: {COVER}')
+    print(f'Stationary: {STATIONARY}')
+    print(f'Attacker Charged: {CHARGED}')
     print(json.dumps(results_dict, indent=4))
 
 
