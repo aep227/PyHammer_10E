@@ -7,6 +7,10 @@
 
 import json
 import math
+import tkinter as tk
+import tkinter.ttk as ttk
+import subprocess
+import threading
 
 ### Set up constants ###
 # Probabilites, no rerolls
@@ -310,7 +314,7 @@ def initialize():
                     skill = 3,
                     strength = 9,
                     AP = -4,
-                    damage = 'd6',
+                    damage = 'D6',
                     abilities = {'MELTA 2'})
     
     bolt_pistol = Weapon(name = '10x Bolt Pistol',
@@ -361,7 +365,7 @@ def initialize():
                keywords = {'INFANTRY'},
                weapons =  {})
     
-    d_VEQ = Unit(name = 'VEQ',
+    d_VEQ = Unit(name = '1x VEQ',
                model_count = 1,
                toughness = 10,
                wounds = 12,
@@ -639,16 +643,29 @@ def calc_unsaved_avg(wounds, dev_wounds, weapon, defender):
 # End calc_unsaved_avg()
 
 
-def calc_slain_avg():
-    """ Calculate the average number of defending models slain """
-    pass
+def calc_slain_avg(unsaved, weapon, defender):
+    """ Calculate the average number of defending models slain
+     
+    Arguments:
+    unsaved - number of unsaved wounds from weapon
+    weapon - the attacking weapon
+    defender - the defending unit
+
+    Returns:
+    slain - the average number of slain models
+    """
+
+    # Convert random damage to average
+    if weapon.damage in RANDOM_VALUE_AVGS:
+        damage = RANDOM_VALUE_AVGS[weapon.damage]
+    else:
+        damage = weapon.damage
+
+    unsaved_to_kill = math.ceil(defender.wounds / damage)
+    slain = unsaved / unsaved_to_kill
+
+    return float('{0:.3f}'.format(slain))
 # End calc_slain_avg()
-
-
-def report_avg():
-    """ Print average results to terminal """
-    pass
-# End report_avg()
 
 
 def create_unit():
@@ -691,8 +708,8 @@ def run_all(attacker_list, defender_list):
                 avg_unsaved = calc_unsaved_avg(avg_wounds, avg_dev_wounds, weapon, defender)
                 results_dict[attacker.name][weapon.name][defender.name]['Avg Unsaved'] = avg_unsaved
 
-                # avg_slain = calc_slain_avg()
-                # results_dict[attacker.name][weapon.name][defender.name]['Avg Slain'] = avg_slain
+                avg_slain = calc_slain_avg(avg_unsaved, weapon, defender)
+                results_dict[attacker.name][weapon.name][defender.name]['Avg Slain'] = avg_slain
 
     return results_dict
 # End run_all()
@@ -700,18 +717,148 @@ def run_all(attacker_list, defender_list):
 
 def main():
     attacker_list, defender_list = initialize()
-    results_dict = run_all(attacker_list, defender_list)
+    # results_dict = run_all(attacker_list, defender_list)
 
 
-    # report_avg()
-    print('===== Global Settings =====')
-    print(f'Half range: {HALF_RANGE}')
-    print(f'Indirect: {INDIRECT}')
-    print(f'Cover: {COVER}')
-    print(f'Stationary: {STATIONARY}')
-    print(f'Attacker Charged: {CHARGED}')
-    print(json.dumps(results_dict, indent=4))
+    # print('===== Global Settings =====')
+    # print(f'Half range: {HALF_RANGE}')
+    # print(f'Indirect: {INDIRECT}')
+    # print(f'Cover: {COVER}')
+    # print(f'Stationary: {STATIONARY}')
+    # print(f'Attacker Charged: {CHARGED}')
+    # print(json.dumps(results_dict, indent=4))
 
+    # User Interface setup
+    root = tk.Tk()
+    default_font = ('Cascadia Code', '14')
+    title_font = ('Cascadia Code', '18', 'bold')
+    default_padding = 20
+
+    s = ttk.Style()
+    s.configure('default.TFrame', font = default_font)
+    s.configure('title.TLabel', font = title_font)
+    s.configure('default.TLabel', font = default_font)
+    s.configure('default.TButton', font = default_font)
+    s.configure('spacer.TLabel', font = ('Cascadia Code', '16'))
+
+    # Attacker frame
+    attacker_frame = ttk.Frame(root, style = 'default.TFrame')
+    attacker_label = ttk.Label(attacker_frame, text = 'Attacker Units', style = 'default.TLabel')
+    weapon_label = ttk.Label(attacker_frame, text = 'Attacker Weapons', style = 'default.TLabel')
+    weapon_stats_label = ttk.Label(attacker_frame, text = 'Weapon Stats', style = 'default.TLabel')
+    attacker_listbox = tk.Listbox(attacker_frame, height = 10, font = default_font)
+    weapon_listbox = tk.Listbox(attacker_frame, height = 10, font = default_font)
+    weapon_stats_listbox = tk.Listbox(attacker_frame, height = 10, font = default_font)
+
+    index = 0
+    for attacker in attacker_list:
+        attacker_listbox.insert(f'{index}', attacker.name)
+        index += 1
+    index = 0
+    for weapon in attacker_list[0].weapons:
+        weapon_listbox.insert(f'{index}', weapon.name)
+        if index == 0:
+            weapon_stats_listbox.insert('0', f'Attacks: {weapon.attacks}')
+            weapon_stats_listbox.insert('1', f'Skill: {weapon.skill}')
+            weapon_stats_listbox.insert('2', f'Strength: {weapon.strength}')
+            weapon_stats_listbox.insert('3', f'AP: {weapon.AP}')
+            weapon_stats_listbox.insert('4', f'Damage: {weapon.damage}')
+            weapon_stats_listbox.insert('5', f'Abilities: {weapon.abilities}')
+        index += 1
+
+
+    # Defender frame
+    defender_frame = ttk.Frame(root, style = 'default.TFrame')
+    defender_label = ttk.Label(defender_frame, text = 'Defender Units', style = 'default.TLabel')
+    defender_stats_label = ttk.Label(defender_frame, text = 'Defender Stats', style = 'default.TLabel')
+    defender_listbox = tk.Listbox(defender_frame, height = 10, font = default_font)
+    defender_stats_listbox = tk.Listbox(defender_frame, height = 10, font = default_font)
+
+    index = 0
+    for defender in defender_list:
+        defender_listbox.insert(f'{index}', defender.name)
+        index += 1
+    index = 0
+    defender_stats_listbox.insert('0', f'Model Count: {defender_list[0].model_count}')
+    defender_stats_listbox.insert('1', f'Toughness: {defender_list[0].toughness}')
+    defender_stats_listbox.insert('2', f'Wounds: {defender_list[0].wounds}')
+    defender_stats_listbox.insert('3', f'Armor: {defender_list[0].armor}')
+    defender_stats_listbox.insert('4', f'Invul: {defender_list[0].invul}')
+    defender_stats_listbox.insert('5', f'Keywords: {defender_list[0].keywords}')
+
+
+    # Results frame
+    results_frame = ttk.Frame(root, style = 'default.TFrame')
+    results_label = ttk.Label(results_frame, text = 'Results', style = 'default.TLabel')
+    results_text = tk.Text(results_frame, height = 24, width = 80, font = default_font)
+    results_scroll_y = ttk.Scrollbar(results_frame, orient = 'vertical', command = results_text.yview)
+    results_scroll_x = ttk.Scrollbar(results_frame, orient = 'horizontal', command = results_text.xview)
+    results_text.config(yscrollcommand=results_scroll_y.set)
+    results_text.config(xscrollcommand=results_scroll_x.set)
+
+
+    # Function buttons
+    db_function_frame = ttk.Frame(root, style = 'default.TFrame')
+    add_attacker_unit_button = ttk.Button(db_function_frame, text = 'Add Attacker Unit', style = 'default.TButton')
+    add_attacker_weapon_button = ttk.Button(db_function_frame, text = 'Add Attacker Weapon', style = 'default.TButton')
+    remove_attacker_unit_button = ttk.Button(db_function_frame, text = 'Remove Attacker Unit', style = 'default.TButton')
+    remove_attacker_weapon_button = ttk.Button(db_function_frame, text = 'Remove Attacker Weapon', style = 'default.TButton')
+    add_defender_unit_button = ttk.Button(db_function_frame, text = 'Add Defender Unit', style = 'default.TButton')
+    remove_defender_unit_button = ttk.Button(db_function_frame, text = 'Remove Defender Unit', style = 'default.TButton')
+
+
+    # Calculation buttons
+    calculate_frame = ttk.Frame(root, style = 'default.TFrame')
+    calculate_all = ttk.Button(calculate_frame, text = 'Calculate All', style = 'default.TButton')
+    calculate_attacker = ttk.Button(calculate_frame, text = 'Calculate Attacker', style = 'default.TButton')
+    calculate_weapon = ttk.Button(calculate_frame, text = 'Calculate Weapon', style = 'default.TButton')
+    calculate_selected = ttk.Button(calculate_frame, text = 'Calculate Selected', style = 'default.TButton')
+
+
+    # Lay out attacker frame
+    attacker_label.grid(       row = 0, column = 0)
+    weapon_label.grid(         row = 0, column = 1)
+    weapon_stats_label.grid(   row = 0, column = 2)
+    attacker_listbox.grid(     row = 1, column = 0)
+    weapon_listbox.grid(       row = 1, column = 1)
+    weapon_stats_listbox.grid( row = 1, column = 2)
+
+    # Lay out defender frame
+    defender_label.grid(         row = 0, column = 0)
+    defender_stats_label.grid(   row = 0, column = 1)
+    defender_listbox.grid(       row = 1, column = 0)
+    defender_stats_listbox.grid( row = 1, column = 1)
+
+    # Lay out results frame
+    results_label.grid( row = 0, column = 0)
+    results_text.grid(  row = 1, column = 0)
+    results_scroll_y.grid(row = 1, column = 1, sticky = 'nsw')
+    results_scroll_x.grid(row = 2, column = 0, sticky = 'nwe')
+
+    # Lay out function frame
+    add_attacker_unit_button.grid(      row = 0, column = 0)
+    add_attacker_weapon_button.grid(    row = 0, column = 1)
+    add_defender_unit_button.grid(      row = 0, column = 2)
+    remove_attacker_unit_button.grid(   row = 1, column = 0)
+    remove_attacker_weapon_button.grid( row = 1, column = 1)
+    remove_defender_unit_button.grid(   row = 1, column = 2)
+
+    # Lay out calculation frame
+    calculate_all.grid(     row = 0, column = 0)
+    calculate_attacker.grid(row = 0, column = 1)
+    calculate_weapon.grid(  row = 0, column = 2)
+    calculate_selected.grid(row = 0, column = 3)
+
+    # Lay out root window
+    attacker_frame.grid(    row = 0, column = 0)
+    defender_frame.grid(    row = 1, column = 0)
+    results_frame.grid(     row = 0, column = 1, rowspan = 2)
+    db_function_frame.grid( row = 2, column = 0)
+    calculate_frame.grid(   row = 2, column = 1)
+
+
+    # Event handling
+    root.mainloop()
 
 if __name__ == '__main__':
     main()
