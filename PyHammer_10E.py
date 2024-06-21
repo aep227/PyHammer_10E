@@ -836,18 +836,18 @@ def main():
     results_scroll_x.grid(row = 2, column = 0, sticky = 'nwe')
 
     # Lay out function frame
-    add_attacker_unit_button.grid(      row = 0, column = 0)
-    add_attacker_weapon_button.grid(    row = 0, column = 1)
-    add_defender_unit_button.grid(      row = 0, column = 2)
-    remove_attacker_unit_button.grid(   row = 1, column = 0)
-    remove_attacker_weapon_button.grid( row = 1, column = 1)
-    remove_defender_unit_button.grid(   row = 1, column = 2)
+    add_attacker_unit_button.grid(      row = 0, column = 0, padx = default_padding, pady = default_padding)
+    add_attacker_weapon_button.grid(    row = 0, column = 1, padx = default_padding, pady = default_padding)
+    add_defender_unit_button.grid(      row = 0, column = 2, padx = default_padding, pady = default_padding)
+    remove_attacker_unit_button.grid(   row = 1, column = 0, padx = default_padding, pady = default_padding)
+    remove_attacker_weapon_button.grid( row = 1, column = 1, padx = default_padding, pady = default_padding)
+    remove_defender_unit_button.grid(   row = 1, column = 2, padx = default_padding, pady = default_padding)
 
     # Lay out calculation frame
-    calculate_all.grid(     row = 0, column = 0)
-    calculate_attacker.grid(row = 0, column = 1)
-    calculate_weapon.grid(  row = 0, column = 2)
-    calculate_selected.grid(row = 0, column = 3)
+    calculate_all.grid(     row = 0, column = 0, padx = default_padding, pady = default_padding)
+    calculate_attacker.grid(row = 0, column = 1, padx = default_padding, pady = default_padding)
+    calculate_weapon.grid(  row = 0, column = 2, padx = default_padding, pady = default_padding)
+    calculate_selected.grid(row = 0, column = 3, padx = default_padding, pady = default_padding)
 
     # Lay out root window
     attacker_frame.grid(    row = 0, column = 0)
