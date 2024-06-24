@@ -259,7 +259,6 @@ def attacker_select(event, attacker_listbox, attacker_list, weapon_listbox):
         for weapon in attacker_list[attacker_index].weapons:
             weapon_listbox.insert(box_index, weapon.name)
             box_index += 1
-        # print('You selected item %d: "%s"', value, value)
 # End attacker_select()
 
 def weapon_select(event, weapon_listbox, attacker_list, weapon_stats_listbox):
@@ -282,12 +281,25 @@ def weapon_select(event, weapon_listbox, attacker_list, weapon_stats_listbox):
                     for ability in weapon.abilities:
                         weapon_stats_listbox.insert(f'{sub_index}', f'{ability}')
                         sub_index += 1
-
             index += 1
-
-        # print('You selected item %d: "%s"', value, value)
 # End attacker_select()
 
+
+def defender_select(event, defender_listbox, defender_list, defender_stats_listbox):
+    if defender_listbox.curselection() != ():
+        defender_index = defender_listbox.curselection()[0]
+
+        defender_stats_listbox.delete(0, tk.END)
+        defender_stats_listbox.insert('0', f'Model Count: {defender_list[defender_index].model_count}')
+        defender_stats_listbox.insert('1', f'T{defender_list[defender_index].toughness} {defender_list[defender_index].wounds}W')
+        defender_stats_listbox.insert('2', f'{defender_list[defender_index].armor}+/{defender_list[defender_index].invul}++')
+        defender_stats_listbox.insert('3', f'Keywords:')
+        sub_index = 4
+        for keyword in defender_list[defender_index].keywords:
+            defender_stats_listbox.insert(f'{sub_index}', f'{keyword}')
+            sub_index += 1
+
+# End defender_select()
 
 def thread_run_all(results_text, attacker_list, defender_list,
                    half_range, indirect, stationary, charged, cover):
@@ -354,23 +366,11 @@ def main():
     attacker_listbox = tk.Listbox(attacker_frame, height = 10, font = default_font)
     weapon_listbox = tk.Listbox(attacker_frame, height = 10, font = default_font)
     weapon_stats_listbox = tk.Listbox(attacker_frame, height = 10, font = default_font)
-
     index = 0
     for attacker in attacker_list:
         attacker_listbox.insert(f'{index}', attacker.name)
         index += 1
     index = 0
-    # for weapon in attacker_list[0].weapons:
-    #     weapon_listbox.insert(f'{index}', weapon.name)
-    #     if index == 0:
-    #         weapon_stats_listbox.insert('0', f'Attacks: {weapon.attacks}')
-    #         weapon_stats_listbox.insert('1', f'Skill: {weapon.skill}')
-    #         weapon_stats_listbox.insert('2', f'Strength: {weapon.strength}')
-    #         weapon_stats_listbox.insert('3', f'AP: {weapon.AP}')
-    #         weapon_stats_listbox.insert('4', f'Damage: {weapon.damage}')
-    #         weapon_stats_listbox.insert('5', f'Abilities: {weapon.abilities}')
-    #     index += 1
-
 
     # Defender frame
     defender_frame = ttk.Frame(root, style = 'default.TFrame')
@@ -378,19 +378,11 @@ def main():
     defender_stats_label = ttk.Label(defender_frame, text = 'Defender Stats', style = 'default.TLabel')
     defender_listbox = tk.Listbox(defender_frame, height = 10, font = default_font)
     defender_stats_listbox = tk.Listbox(defender_frame, height = 10, font = default_font)
-
     index = 0
     for defender in defender_list:
         defender_listbox.insert(f'{index}', defender.name)
         index += 1
     index = 0
-    defender_stats_listbox.insert('0', f'Model Count: {defender_list[0].model_count}')
-    defender_stats_listbox.insert('1', f'Toughness: {defender_list[0].toughness}')
-    defender_stats_listbox.insert('2', f'Wounds: {defender_list[0].wounds}')
-    defender_stats_listbox.insert('3', f'Armor: {defender_list[0].armor}')
-    defender_stats_listbox.insert('4', f'Invul: {defender_list[0].invul}')
-    defender_stats_listbox.insert('5', f'Keywords: {defender_list[0].keywords}')
-
 
     # Results frame
     results_frame = ttk.Frame(root, style = 'default.TFrame')
@@ -492,6 +484,7 @@ def main():
     selected_attacker = None
     attacker_listbox.bind('<<ListboxSelect>>', lambda event: attacker_select(event, attacker_listbox, attacker_list, weapon_listbox))
     weapon_listbox.bind('<<ListboxSelect>>', lambda event: weapon_select(event, weapon_listbox, attacker_list, weapon_stats_listbox))
+    defender_listbox.bind('<<ListboxSelect>>', lambda event: defender_select(event, defender_listbox, defender_list, defender_stats_listbox))
     root.mainloop()
 
 if __name__ == '__main__':
