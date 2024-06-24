@@ -30,12 +30,6 @@ RANDOM_VALUE_AVGS = {
     'D6_PLUS_6': 9.5,
 }
 
-HALF_RANGE = False
-INDIRECT = False
-COVER = False
-STATIONARY = False
-CHARGED = False
-
 '''
 Available weapon keywords:
 - Rapid Fire X
@@ -58,7 +52,7 @@ Available unit keywords:
 '''
 
 
-def calc_hits_avg(weapon, defender):
+def calc_hits_avg(weapon, defender, half_range, indirect, stationary):
     """ Calculate the average number of hits
 
     Arguments:
@@ -79,12 +73,11 @@ def calc_hits_avg(weapon, defender):
     # Multiple attacks by number of weapons
     attacks *= weapon.count
 
-
     # Calculate weapon abilities
     for ability in weapon.abilities:
         # Attack modifiers first
-        if 'RAPID FIRE' in ability and HALF_RANGE == True:
-            value = ability[:-2].strip()
+        if 'RAPID FIRE' in ability and half_range == True:
+            value = ability[-2:].strip()
             if value == 'D3':
                 value = 2
             attacks += int(value) * weapon.count
@@ -108,11 +101,11 @@ def calc_hits_avg(weapon, defender):
     
     # Determine target number
     skill_mod = 0
-    if STATIONARY == True and 'HEAVY' in weapon.abilities:
+    if stationary == True and 'HEAVY' in weapon.abilities:
         skill_mod -= 1
     if 'STEALTH' in defender.abilities:
         skill_mod += 1
-    if INDIRECT == True and 'INDIRECT FIRE' in weapon.abilities:
+    if indirect == True and 'INDIRECT FIRE' in weapon.abilities:
         skill_mod += 1
 
     # Cap skill modification to +/- 1
@@ -123,11 +116,18 @@ def calc_hits_avg(weapon, defender):
     
     mod_skill = weapon.skill + skill_mod
 
-    # Cap target number
-    if mod_skill < 2:
-        mod_skill = 2
-    elif mod_skill > 6:
-        mod_skill = 6
+    # Cap target number. Indirect capped at 4+ to hit at best now
+    if indirect == True and 'INDIRECT FIRE' in weapon.abilities:
+        if mod_skill < 4:
+            mod_skill = 4
+        elif mod_skill > 6:
+            mod_skill = 6
+    else:
+        if mod_skill < 2:
+            mod_skill = 2
+        elif mod_skill > 6:
+            mod_skill = 6
+
 
     # Determine rerolls
     if 'REROLL ONES HITS' in weapon.abilities:
@@ -180,11 +180,11 @@ def calc_hits_avg(weapon, defender):
                     case 6:
                         hits = attacks * P6_RRA
 
-    return float('{0:.3f}'.format(hits+sustained)), float('{0:.3f}'.format(lethals))
+    return float('{0:.2f}'.format(hits+sustained)), float('{0:.2f}'.format(lethals))
 # End calc_hits_avg()
 
 
-def calc_wounds_avg(hits, lethals, weapon, defender):
+def calc_wounds_avg(hits, lethals, weapon, defender, charged):
     """ Calculate the average number of wounds 
     
     Arguments:
@@ -217,7 +217,7 @@ def calc_wounds_avg(hits, lethals, weapon, defender):
         target = 6
 
     # Check LANCE
-    if 'LANCE' in weapon.abilities and CHARGED == True:
+    if 'LANCE' in weapon.abilities and charged == True:
         target -= 1
 
     # Cap wound target
@@ -255,11 +255,11 @@ def calc_wounds_avg(hits, lethals, weapon, defender):
     # Add lethals
     wounds += lethals
 
-    return float('{0:.3f}'.format(wounds)), float('{0:.3f}'.format(dev_wounds))
+    return float('{0:.2f}'.format(wounds)), float('{0:.2f}'.format(dev_wounds))
 # End calc_wounds_avg()
 
 
-def calc_unsaved_avg(wounds, dev_wounds, weapon, defender):
+def calc_unsaved_avg(wounds, dev_wounds, weapon, defender, cover):
     """ Calculate the average number of unsaved wounds
     
     Arguments:
@@ -277,7 +277,7 @@ def calc_unsaved_avg(wounds, dev_wounds, weapon, defender):
     mod_armor = defender.armor - weapon.AP
 
     # Check for cover
-    if COVER and 'IGNORES COVER' not in weapon.abilities:
+    if cover and 'IGNORES COVER' not in weapon.abilities:
         mod_armor -= 1
 
     # Prevent 3+ armor going to a 2+ armor in cover vs AP0
@@ -293,6 +293,8 @@ def calc_unsaved_avg(wounds, dev_wounds, weapon, defender):
     # Cap save
     if save > 7:
         save = 7
+    elif save < 2:
+        save = 2
 
     # Determine number of unsaved wounds        
     match save:
@@ -311,7 +313,7 @@ def calc_unsaved_avg(wounds, dev_wounds, weapon, defender):
 
     unsaved += dev_wounds
 
-    return float('{0:.3f}'.format(unsaved))
+    return float('{0:.2f}'.format(unsaved))
 # End calc_unsaved_avg()
 
 
@@ -336,5 +338,5 @@ def calc_slain_avg(unsaved, weapon, defender):
     unsaved_to_kill = math.ceil(defender.wounds / damage)
     slain = unsaved / unsaved_to_kill
 
-    return float('{0:.3f}'.format(slain))
+    return float('{0:.2f}'.format(slain))
 # End calc_slain_avg()

@@ -10,29 +10,10 @@ import Unit
 import calc_functions as calc
 import tkinter as tk
 import tkinter.ttk as ttk
-from functools import partial
 import subprocess
 import threading
 from prettytable import PrettyTable
-
-### Set up constants ###
-
-# Calculation Settings
-# Root window created here. Otherwise Python complains about
-# tk.Vars being created before a window
-# TO-DO: I think these eventually need to be passed into their
-# respective calc functions
-root = tk.Tk()
-G_HALF_RANGE = tk.BooleanVar()
-G_HALF_RANGE.set(False)
-G_INDIRECT = tk.BooleanVar()
-G_INDIRECT.set(False)
-G_COVER = tk.BooleanVar()
-G_COVER.set(False)
-G_STATIONARY = tk.BooleanVar()
-G_STATIONARY.set(False)
-G_CHARGED = tk.BooleanVar()
-G_CHARGED.set(False)
+from prettytable import SINGLE_BORDER
 
 
 def initialize():
@@ -43,16 +24,25 @@ def initialize():
     """
 
     # Create weapons first
-    bolter = Weapon.Weapon(name = '5x Bolter',
+    bolterX5 = Weapon.Weapon(name = '5x Bolter',
                     count = 5,
-                    attacks = 2,
+                    attacks = 1,
                     skill = 3,
                     strength = 5,
                     AP = 0,
                     damage = 1,
                     abilities = {'RAPID FIRE 1'})
     
-    flamer = Weapon.Weapon(name = '4x Flamer',
+    bolterX10 = Weapon.Weapon(name = '10x Bolter',
+                    count = 10,
+                    attacks = 1,
+                    skill = 3,
+                    strength = 4,
+                    AP = 0,
+                    damage = 1,
+                    abilities = {'RAPID FIRE 1'})
+    
+    flamerX4 = Weapon.Weapon(name = '4x Flamer',
                     count = 4,
                     attacks = 'D6',
                     skill = 3,
@@ -61,7 +51,7 @@ def initialize():
                     damage = 1,
                     abilities = {'TORRENT'})
     
-    meltagun = Weapon.Weapon(name = '4x Meltagun',
+    meltagunX4 = Weapon.Weapon(name = '4x Meltagun',
                     count = 4,
                     attacks = 1,
                     skill = 3,
@@ -70,9 +60,9 @@ def initialize():
                     damage = 'D6',
                     abilities = {'MELTA 2'})
     
-    storm_bolter = Weapon.Weapon(name = '4x Storm Bolter',
+    storm_bolterX4 = Weapon.Weapon(name = '4x Storm Bolter',
                     count = 4,
-                    attacks = 4,
+                    attacks = 2,
                     skill = 3,
                     strength = 5,
                     AP = 0,
@@ -80,14 +70,23 @@ def initialize():
                     abilities = {'RAPID FIRE 2'})
 
     # Create units
-    doms = Unit.Unit(name = '10xDominions',
+    doms = Unit.Unit(name = '10x Dominions',
                model_count = 10,
                toughness = 3,
                wounds = 1,
                armor = 3,
                invul = None,
                keywords = {'INFANTRY'},
-               weapons =  {bolter, storm_bolter, flamer, meltagun})
+               weapons =  {bolterX5, storm_bolterX4, flamerX4, meltagunX4})
+    
+    bss = Unit.Unit(name = '10x BSS',
+               model_count = 10,
+               toughness = 3,
+               wounds = 1,
+               armor = 3,
+               invul = None,
+               keywords = {'INFANTRY'},
+               weapons =  {bolterX10})
     
 
     # Defender defaults
@@ -141,7 +140,7 @@ def initialize():
     # pretty_bss = json.dumps(bss.report(), indent=4)
     # print(pretty_bss)
 
-    attacker_list = [doms]
+    attacker_list = [doms, bss]
     defender_list = [d_GEQ, d_MEQ, d_TEQ, d_VEQ, d_KEQ]
 
     return attacker_list, defender_list
@@ -158,7 +157,8 @@ def create_weapon():
 # End create_weapon()
 
 
-def run_all(results_text, attacker_list, defender_list):
+def run_all(results_text, attacker_list, defender_list,
+            half_range, indirect, stationary, charged, cover):
     results_dict = {}
     for attacker in attacker_list:
         if attacker not in results_dict:
@@ -172,13 +172,16 @@ def run_all(results_text, attacker_list, defender_list):
                 if weapon not in results_dict[attacker.name][weapon.name]:
                     results_dict[attacker.name][weapon.name][defender.name] = {}
 
-                avg_hits, avg_lethals = calc.calc_hits_avg(weapon, defender)
+                avg_hits, avg_lethals = calc.calc_hits_avg(weapon, defender, 
+                                                           half_range, indirect, stationary)
                 results_dict[attacker.name][weapon.name][defender.name]['Avg Hits'] = avg_hits
     
-                avg_wounds, avg_dev_wounds = calc.calc_wounds_avg(avg_hits, avg_lethals, weapon, defender)
+                avg_wounds, avg_dev_wounds = calc.calc_wounds_avg(avg_hits, avg_lethals, weapon, defender,
+                                                                  charged)
                 results_dict[attacker.name][weapon.name][defender.name]['Avg Wounds'] = avg_wounds
 
-                avg_unsaved = calc.calc_unsaved_avg(avg_wounds, avg_dev_wounds, weapon, defender)
+                avg_unsaved = calc.calc_unsaved_avg(avg_wounds, avg_dev_wounds, weapon, defender,
+                                                    cover)
                 results_dict[attacker.name][weapon.name][defender.name]['Avg Unsaved'] = avg_unsaved
 
                 avg_slain = calc.calc_slain_avg(avg_unsaved, weapon, defender)
@@ -186,6 +189,7 @@ def run_all(results_text, attacker_list, defender_list):
 
     
     table = PrettyTable()
+    table.set_style(SINGLE_BORDER)
     header_row = ['Weapon']
 
     for defender in defender_list:
@@ -193,12 +197,28 @@ def run_all(results_text, attacker_list, defender_list):
 
     table.field_names = header_row
 
+    attacker_index = 1
     for attacker in results_dict:
+        # Attacker divider
+        attacker_title = [f'{attacker}']
+        for defender in defender_list:
+            attacker_title.append('')
+        table.add_row(attacker_title)
+
         for weapon in results_dict[f'{attacker}']:
             row = [f'{weapon}']
             for defender in results_dict[f'{attacker}'][f'{weapon}']:
                 row.append(results_dict[f'{attacker}'][f'{weapon}'][f'{defender}']['Avg Slain'])
             table.add_row(row)
+        
+        # Blank row for next attacker
+        if len(results_dict.keys()) > 1 and attacker_index != len(results_dict.keys()):
+            blank_row = [f'']
+            for defender in defender_list:
+                blank_row.append('')
+            table.add_row(blank_row)
+            attacker_index += 1
+        
     # print(table)
 
     results_text.config(state = 'normal')
@@ -209,7 +229,8 @@ def run_all(results_text, attacker_list, defender_list):
 # End run_all()
 
 # TO-DO: Change attacker_list to a single attacker
-def run_attacker(results_text, attacker_list, defender_list):
+def run_attacker(results_text, attacker_list, defender_list,
+                 half_range, indirect, stationary, charged, cover):
     results_text.config(state = 'normal')
     results_text.delete('1.0', tk.END)
     results_text.insert('1.0', 'In run_attacker()')
@@ -218,7 +239,8 @@ def run_attacker(results_text, attacker_list, defender_list):
 # End run_attacker()
 
 # TO-DO: Change attacker_list to a single weapon
-def run_weapon(results_text, attacker_list, defender_list):
+def run_weapon(results_text, attacker_list, defender_list,
+               half_range, indirect, stationary, charged, cover):
     results_text.config(state = 'normal')
     results_text.delete('1.0', tk.END)
     results_text.insert('1.0', 'In run_weapon()')
@@ -240,30 +262,34 @@ def run_weapon(results_text, attacker_list, defender_list):
 #     print('You selected item %d: "%s"' % (index, value))
 
 
-def thread_run_all(results_text, attacker_list, defender_list):
+def thread_run_all(results_text, attacker_list, defender_list,
+                   half_range, indirect, stationary, charged, cover):
     """ Creates the sub-thread to run all attackers against all defenders """
 
-    t1 = threading.Thread(target = run_all, args = (results_text, attacker_list, defender_list))
+    t1 = threading.Thread(target = run_all, args = (results_text, attacker_list, defender_list,
+                                                    half_range, indirect, stationary, charged, cover))
     t1.start()
 # End thread_run_all()
 
 
-def thread_run_attacker(results_text, attacker_list, defender_list):
+def thread_run_attacker(results_text, attacker_list, defender_list,
+                        half_range, indirect, stationary, charged, cover):
     """ Creates the sub-thread to run the selected attacker against all defenders """
 
-    t2 = threading.Thread(target = run_attacker, args = (results_text, attacker_list, defender_list))
+    t2 = threading.Thread(target = run_attacker, args = (results_text, attacker_list, defender_list,
+                                                         half_range, indirect, stationary, charged, cover))
     t2.start()
 # End thread_run_attacker()
 
 
-def thread_run_weapon(results_text, attacker_list, defender_list):
+def thread_run_weapon(results_text, attacker_list, defender_list,
+                      half_range, indirect, stationary, charged, cover):
     """ Creates the sub-thread to run the selected weapon against all defenders """
 
-    t3 = threading.Thread(target = run_weapon, args = (results_text, attacker_list, defender_list))
+    t3 = threading.Thread(target = run_weapon, args = (results_text, attacker_list, defender_list,
+                                                       half_range, indirect, stationary, charged, cover))
     t3.start()
 # End thread_run_weapon()
-
-
 
 
 def main():
@@ -275,6 +301,12 @@ def main():
     #    User Interface setup   #
     #############################
 
+    root = tk.Tk()
+    G_HALF_RANGE = tk.BooleanVar(root)
+    G_INDIRECT = tk.BooleanVar(root)
+    G_COVER = tk.BooleanVar(root)
+    G_STATIONARY = tk.BooleanVar(root)
+    G_CHARGED = tk.BooleanVar(root)
     default_font = ('Cascadia Code', '14')
     title_font = ('Cascadia Code', '18', 'bold')
     default_padding = 20
@@ -356,15 +388,18 @@ def main():
     # Calculation buttons
     calculate_frame = ttk.Frame(root, style = 'default.TFrame')
     calculate_all = ttk.Button(calculate_frame, text = 'Calculate All',
-                               command = partial(thread_run_all, results_text, attacker_list, defender_list),
+                               command = lambda: thread_run_all(results_text, attacker_list, defender_list,
+                                                 G_HALF_RANGE.get(), G_INDIRECT.get(), G_STATIONARY.get(), G_CHARGED.get(), G_COVER.get()),
                                style = 'default.TButton')
     calculate_attacker = ttk.Button(calculate_frame,
                                     text = 'Calculate Attacker',
-                                    command = partial(thread_run_attacker, results_text, attacker_list, defender_list),
+                                    command = lambda: thread_run_attacker(results_text, attacker_list, defender_list,
+                                                      G_HALF_RANGE.get(), G_INDIRECT.get(), G_STATIONARY.get(), G_CHARGED.get(), G_COVER.get()),
                                     style = 'default.TButton')
     calculate_weapon = ttk.Button(calculate_frame,
                                   text = 'Calculate Weapon',
-                                  command = partial(thread_run_weapon, results_text, attacker_list, defender_list),
+                                  command = lambda: thread_run_weapon(results_text, attacker_list, defender_list,
+                                                    G_HALF_RANGE.get(), G_INDIRECT.get(), G_STATIONARY.get(), G_CHARGED.get(), G_COVER.get()),
                                   style = 'default.TButton')
 
 
