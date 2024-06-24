@@ -8,9 +8,9 @@
 import Weapon
 import Unit
 import calc_functions as calc
-import json
 import tkinter as tk
 import tkinter.ttk as ttk
+from functools import partial
 import subprocess
 import threading
 from prettytable import PrettyTable
@@ -149,7 +149,7 @@ def create_weapon():
 # End create_weapon()
 
 
-def run_all(attacker_list, defender_list):
+def run_all(results_text, attacker_list, defender_list):
     results_dict = {}
     for attacker in attacker_list:
         # print(attacker.name)
@@ -178,17 +178,29 @@ def run_all(attacker_list, defender_list):
                 avg_slain = calc.calc_slain_avg(avg_unsaved, weapon, defender)
                 results_dict[attacker.name][weapon.name][defender.name]['Avg Slain'] = avg_slain
     
-    print(results_dict) 
+    results_text.config(state = 'normal')
+    results_text.delete('1.0', tk.END)
+    results_text.insert('1.0', results_dict)
+    results_text.see(tk.END)
+    results_text.config(state = 'disabled')
 # End run_all()
 
-
-def run_attacker():
-    print('In run_attacker()')
+# TO-DO: Change attacker_list to a single attacker
+def run_attacker(results_text, attacker_list, defender_list):
+    results_text.config(state = 'normal')
+    results_text.delete('1.0', tk.END)
+    results_text.insert('1.0', 'In run_attacker()')
+    results_text.see(tk.END)
+    results_text.config(state = 'disabled')
 # End run_attacker()
 
-
-def run_weapon():
-    print('In run_weapon()')
+# TO-DO: Change attacker_list to a single weapon
+def run_weapon(results_text, attacker_list, defender_list):
+    results_text.config(state = 'normal')
+    results_text.delete('1.0', tk.END)
+    results_text.insert('1.0', 'In run_weapon()')
+    results_text.see(tk.END)
+    results_text.config(state = 'disabled')
 # End run_weapon()
 
 
@@ -205,26 +217,26 @@ def run_weapon():
 #     print('You selected item %d: "%s"' % (index, value))
 
 
-def thread_run_all(attacker_list, defender_list):
+def thread_run_all(results_text, attacker_list, defender_list):
     """ Creates the sub-thread to run all attackers against all defenders """
 
-    t1 = threading.Thread(target = run_all, args = (attacker_list, defender_list))
+    t1 = threading.Thread(target = run_all, args = (results_text, attacker_list, defender_list))
     t1.start()
 # End thread_run_all()
 
 
-def thread_run_attacker():
+def thread_run_attacker(results_text, attacker_list, defender_list):
     """ Creates the sub-thread to run the selected attacker against all defenders """
 
-    t2 = threading.Thread(target = run_attacker)
+    t2 = threading.Thread(target = run_attacker, args = (results_text, attacker_list, defender_list))
     t2.start()
 # End thread_run_attacker()
 
 
-def thread_run_weapon():
+def thread_run_weapon(results_text, attacker_list, defender_list):
     """ Creates the sub-thread to run the selected weapon against all defenders """
 
-    t3 = threading.Thread(target = run_weapon)
+    t3 = threading.Thread(target = run_weapon, args = (results_text, attacker_list, defender_list))
     t3.start()
 # End thread_run_weapon()
 
@@ -321,15 +333,15 @@ def main():
     # Calculation buttons
     calculate_frame = ttk.Frame(root, style = 'default.TFrame')
     calculate_all = ttk.Button(calculate_frame, text = 'Calculate All',
-                               command = lambda: thread_run_all(attacker_list, defender_list),
+                               command = partial(thread_run_all, results_text, attacker_list, defender_list),
                                style = 'default.TButton')
     calculate_attacker = ttk.Button(calculate_frame,
                                     text = 'Calculate Attacker',
-                                    command = thread_run_attacker,
+                                    command = partial(thread_run_attacker, results_text, attacker_list, defender_list),
                                     style = 'default.TButton')
     calculate_weapon = ttk.Button(calculate_frame,
                                   text = 'Calculate Weapon',
-                                  command = thread_run_weapon,
+                                  command = partial(thread_run_weapon, results_text, attacker_list, defender_list),
                                   style = 'default.TButton')
 
 
