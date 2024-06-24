@@ -49,7 +49,7 @@ def initialize():
                     strength = 6,
                     AP = 0,
                     damage = 1,
-                    abilities = {'TORRENT'})
+                    abilities = {'TORRENT', 'IGNORES COVER'})
     
     meltagunX4 = Weapon.Weapon(name = '4x Meltagun',
                     count = 4,
@@ -134,11 +134,6 @@ def initialize():
                invul = 5,
                keywords = {'VEHICLE', 'TITANIC'},
                weapons =  {})
-
-    # pretty_bolter = json.dumps(bolter.report(), indent=4)
-    # print(pretty_bolter)
-    # pretty_bss = json.dumps(bss.report(), indent=4)
-    # print(pretty_bss)
 
     attacker_list = [doms, bss]
     defender_list = [d_GEQ, d_MEQ, d_TEQ, d_VEQ, d_KEQ]
@@ -255,11 +250,43 @@ def run_weapon(results_text, attacker_list, defender_list,
 #        GUI Functions        #
 ###############################
 
-# def weapon_select(evt):
-#     w = evt.widget
-#     index = int(w.curselection()[0])
-#     value = w.get(index)
-#     print('You selected item %d: "%s"' % (index, value))
+def attacker_select(event, attacker_listbox, attacker_list, weapon_listbox):
+    if attacker_listbox.curselection() != ():
+        attacker_index = attacker_listbox.curselection()[0]
+
+        box_index = 0
+        weapon_listbox.delete(0, tk.END)
+        for weapon in attacker_list[attacker_index].weapons:
+            weapon_listbox.insert(box_index, weapon.name)
+            box_index += 1
+        # print('You selected item %d: "%s"', value, value)
+# End attacker_select()
+
+def weapon_select(event, weapon_listbox, attacker_list, weapon_stats_listbox):
+    if weapon_listbox.curselection() != ():
+        weapon_index = weapon_listbox.curselection()[0]
+
+        # Determine which attacker has the selected weapon
+        # Known issue: if multiple weapons share the same name, this can't determine which
+        # of the multiple weapons is the 'correct' one
+        index = 0
+        for attacker in attacker_list:
+            for weapon in attacker.weapons:
+                if weapon_listbox.get(weapon_index) == weapon.name:
+                    weapon_stats_listbox.delete(0, tk.END)
+                    weapon_stats_listbox.insert('0', f'{weapon.count}x{weapon.attacks} attacks')
+                    weapon_stats_listbox.insert('1', f'Hitting on {weapon.skill}+')
+                    weapon_stats_listbox.insert('2', f'S{weapon.strength} AP{weapon.AP} {weapon.damage}D')
+                    weapon_stats_listbox.insert('3', f'Abilities:')
+                    sub_index = 4
+                    for ability in weapon.abilities:
+                        weapon_stats_listbox.insert(f'{sub_index}', f'{ability}')
+                        sub_index += 1
+
+            index += 1
+
+        # print('You selected item %d: "%s"', value, value)
+# End attacker_select()
 
 
 def thread_run_all(results_text, attacker_list, defender_list,
@@ -333,16 +360,16 @@ def main():
         attacker_listbox.insert(f'{index}', attacker.name)
         index += 1
     index = 0
-    for weapon in attacker_list[0].weapons:
-        weapon_listbox.insert(f'{index}', weapon.name)
-        if index == 0:
-            weapon_stats_listbox.insert('0', f'Attacks: {weapon.attacks}')
-            weapon_stats_listbox.insert('1', f'Skill: {weapon.skill}')
-            weapon_stats_listbox.insert('2', f'Strength: {weapon.strength}')
-            weapon_stats_listbox.insert('3', f'AP: {weapon.AP}')
-            weapon_stats_listbox.insert('4', f'Damage: {weapon.damage}')
-            weapon_stats_listbox.insert('5', f'Abilities: {weapon.abilities}')
-        index += 1
+    # for weapon in attacker_list[0].weapons:
+    #     weapon_listbox.insert(f'{index}', weapon.name)
+    #     if index == 0:
+    #         weapon_stats_listbox.insert('0', f'Attacks: {weapon.attacks}')
+    #         weapon_stats_listbox.insert('1', f'Skill: {weapon.skill}')
+    #         weapon_stats_listbox.insert('2', f'Strength: {weapon.strength}')
+    #         weapon_stats_listbox.insert('3', f'AP: {weapon.AP}')
+    #         weapon_stats_listbox.insert('4', f'Damage: {weapon.damage}')
+    #         weapon_stats_listbox.insert('5', f'Abilities: {weapon.abilities}')
+    #     index += 1
 
 
     # Defender frame
@@ -462,7 +489,9 @@ def main():
 
 
     # Event handling
-    # weapon_listbox.bind('<<ListboxSelect>>', weapon_select)
+    selected_attacker = None
+    attacker_listbox.bind('<<ListboxSelect>>', lambda event: attacker_select(event, attacker_listbox, attacker_list, weapon_listbox))
+    weapon_listbox.bind('<<ListboxSelect>>', lambda event: weapon_select(event, weapon_listbox, attacker_list, weapon_stats_listbox))
     root.mainloop()
 
 if __name__ == '__main__':
