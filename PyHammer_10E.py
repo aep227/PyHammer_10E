@@ -11,6 +11,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import subprocess
 import threading
+from prettytable import PrettyTable
 
 ### Set up constants ###
 # Probabilites, no rerolls
@@ -64,14 +65,6 @@ Available unit keywords:
 - Stealth
 
 '''
-
-# Global settings
-HALF_RANGE = False
-INDIRECT = False
-COVER = False
-STATIONARY = False
-CHARGED = False
-
 
 class Weapon:
     """ Class for defining a Weapon """
@@ -715,20 +708,28 @@ def run_all(attacker_list, defender_list):
 # End run_all()
 
 
+###############################
+#        GUI Functions        #
+###############################
+
+def weapon_select(evt):
+    w = evt.widget
+    index = int(w.curselection()[0])
+    value = w.get(index)
+    print('You selected item %d: "%s"' % (index, value))
+
+
+
+
 def main():
     attacker_list, defender_list = initialize()
     # results_dict = run_all(attacker_list, defender_list)
 
 
-    # print('===== Global Settings =====')
-    # print(f'Half range: {HALF_RANGE}')
-    # print(f'Indirect: {INDIRECT}')
-    # print(f'Cover: {COVER}')
-    # print(f'Stationary: {STATIONARY}')
-    # print(f'Attacker Charged: {CHARGED}')
-    # print(json.dumps(results_dict, indent=4))
+    #############################
+    #    User Interface setup   #
+    #############################
 
-    # User Interface setup
     root = tk.Tk()
     default_font = ('Cascadia Code', '14')
     title_font = ('Cascadia Code', '18', 'bold')
@@ -739,6 +740,7 @@ def main():
     s.configure('title.TLabel', font = title_font)
     s.configure('default.TLabel', font = default_font)
     s.configure('default.TButton', font = default_font)
+    s.configure('default.TCheckbutton', font = default_font)
     s.configure('spacer.TLabel', font = ('Cascadia Code', '16'))
 
     # Attacker frame
@@ -787,6 +789,8 @@ def main():
     defender_stats_listbox.insert('5', f'Keywords: {defender_list[0].keywords}')
 
 
+
+
     # Results frame
     results_frame = ttk.Frame(root, style = 'default.TFrame')
     results_label = ttk.Label(results_frame, text = 'Results', style = 'default.TLabel')
@@ -815,49 +819,77 @@ def main():
     calculate_selected = ttk.Button(calculate_frame, text = 'Calculate Selected', style = 'default.TButton')
 
 
+    # Settings frame
+    HALF_RANGE = tk.BooleanVar()
+    HALF_RANGE.set(False)
+    INDIRECT = tk.BooleanVar()
+    INDIRECT.set(False)
+    COVER = tk.BooleanVar()
+    COVER.set(False)
+    STATIONARY = tk.BooleanVar()
+    STATIONARY.set(False)
+    CHARGED = tk.BooleanVar()
+    CHARGED.set(False)
+    settings_frame = ttk.Frame(root, style = 'default.TFrame')
+    half_range_check = ttk.Checkbutton(settings_frame, text = 'Attacker Half Range', variable = HALF_RANGE, style = 'default.TCheckbutton', offvalue = False, onvalue = True)
+    indirect_check = ttk.Checkbutton(settings_frame, text = 'Attacker Indirect', variable = INDIRECT, style = 'default.TCheckbutton', offvalue = False, onvalue = True)
+    stationary_check = ttk.Checkbutton(settings_frame, text = 'Attacker Stationary', variable = STATIONARY, style = 'default.TCheckbutton', offvalue = False, onvalue = True)
+    charged_check = ttk.Checkbutton(settings_frame, text = 'Attacker Charged', variable = CHARGED, style = 'default.TCheckbutton', offvalue = False, onvalue = True)
+    cover_check = ttk.Checkbutton(settings_frame, text = 'Defender in Cover', variable = COVER, style = 'default.TCheckbutton', offvalue = False, onvalue = True)
+
+
     # Lay out attacker frame
     attacker_label.grid(       row = 0, column = 0)
     weapon_label.grid(         row = 0, column = 1)
     weapon_stats_label.grid(   row = 0, column = 2)
-    attacker_listbox.grid(     row = 1, column = 0)
+    attacker_listbox.grid(     row = 1, column = 0, padx = default_padding, pady = default_padding)
     weapon_listbox.grid(       row = 1, column = 1)
-    weapon_stats_listbox.grid( row = 1, column = 2)
+    weapon_stats_listbox.grid( row = 1, column = 2, padx = default_padding, pady = default_padding)
 
     # Lay out defender frame
     defender_label.grid(         row = 0, column = 0)
     defender_stats_label.grid(   row = 0, column = 1)
-    defender_listbox.grid(       row = 1, column = 0)
+    defender_listbox.grid(       row = 1, column = 0, padx = default_padding, pady = default_padding)
     defender_stats_listbox.grid( row = 1, column = 1)
 
+    # Lay out settings frame
+    half_range_check.grid(  row = 0, column = 0, padx = default_padding, sticky = 'w')
+    indirect_check.grid(    row = 1, column = 0, padx = default_padding, sticky = 'w')
+    stationary_check.grid(  row = 0, column = 1, padx = default_padding, sticky = 'w')
+    charged_check.grid(     row = 1, column = 1, padx = default_padding, sticky = 'w')
+    cover_check.grid(       row = 0, column = 2, padx = default_padding, sticky = 'w')
+
     # Lay out results frame
-    results_label.grid( row = 0, column = 0)
-    results_text.grid(  row = 1, column = 0)
-    results_scroll_y.grid(row = 1, column = 1, sticky = 'nsw')
-    results_scroll_x.grid(row = 2, column = 0, sticky = 'nwe')
+    results_label.grid(    row = 0, column = 0)
+    results_text.grid(     row = 1, column = 0)
+    results_scroll_y.grid( row = 1, column = 1, sticky = 'nsw')
+    results_scroll_x.grid( row = 2, column = 0, sticky = 'nwe')
 
     # Lay out function frame
-    add_attacker_unit_button.grid(      row = 0, column = 0)
-    add_attacker_weapon_button.grid(    row = 0, column = 1)
-    add_defender_unit_button.grid(      row = 0, column = 2)
-    remove_attacker_unit_button.grid(   row = 1, column = 0)
-    remove_attacker_weapon_button.grid( row = 1, column = 1)
-    remove_defender_unit_button.grid(   row = 1, column = 2)
+    add_attacker_unit_button.grid(      row = 0, column = 0, padx = default_padding, pady = default_padding)
+    add_attacker_weapon_button.grid(    row = 0, column = 1, padx = default_padding, pady = default_padding)
+    add_defender_unit_button.grid(      row = 0, column = 2, padx = default_padding, pady = default_padding)
+    remove_attacker_unit_button.grid(   row = 1, column = 0, padx = default_padding, pady = default_padding)
+    remove_attacker_weapon_button.grid( row = 1, column = 1, padx = default_padding, pady = default_padding)
+    remove_defender_unit_button.grid(   row = 1, column = 2, padx = default_padding, pady = default_padding)
 
     # Lay out calculation frame
-    calculate_all.grid(     row = 0, column = 0)
-    calculate_attacker.grid(row = 0, column = 1)
-    calculate_weapon.grid(  row = 0, column = 2)
-    calculate_selected.grid(row = 0, column = 3)
+    calculate_all.grid(      row = 0, column = 0, padx = default_padding, pady = default_padding)
+    calculate_attacker.grid( row = 0, column = 1, padx = default_padding, pady = default_padding)
+    calculate_weapon.grid(   row = 0, column = 2, padx = default_padding, pady = default_padding)
+    calculate_selected.grid( row = 0, column = 3, padx = default_padding, pady = default_padding)
 
     # Lay out root window
-    attacker_frame.grid(    row = 0, column = 0)
+    attacker_frame.grid(    row = 0, column = 0, columnspan = 2)
     defender_frame.grid(    row = 1, column = 0)
-    results_frame.grid(     row = 0, column = 1, rowspan = 2)
-    db_function_frame.grid( row = 2, column = 0)
-    calculate_frame.grid(   row = 2, column = 1)
+    results_frame.grid(     row = 0, column = 2, rowspan = 2)
+    db_function_frame.grid( row = 2, column = 0, rowspan = 2)
+    settings_frame.grid(    row = 2, column = 2)
+    calculate_frame.grid(   row = 3, column = 2)
 
 
     # Event handling
+    weapon_listbox.bind('<<ListboxSelect>>', weapon_select)
     root.mainloop()
 
 if __name__ == '__main__':
