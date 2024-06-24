@@ -43,51 +43,51 @@ def initialize():
     """
 
     # Create weapons first
-    bolter = Weapon.Weapon(name = '10x Bolter',
-                    count = 10,
-                    attacks = 1,
-                    skill = 3,
-                    strength = 4,
-                    AP = 0,
-                    damage = 1,
-                    abilities = {'RAPID FIRE 1'})
-    
-    flamer = Weapon.Weapon(name = '2x Flamer',
-                    count = 2,
-                    attacks = 'D6',
+    bolter = Weapon.Weapon(name = '5x Bolter',
+                    count = 5,
+                    attacks = 2,
                     skill = 3,
                     strength = 5,
                     AP = 0,
                     damage = 1,
+                    abilities = {'RAPID FIRE 1'})
+    
+    flamer = Weapon.Weapon(name = '4x Flamer',
+                    count = 4,
+                    attacks = 'D6',
+                    skill = 3,
+                    strength = 6,
+                    AP = 0,
+                    damage = 1,
                     abilities = {'TORRENT'})
     
-    meltagun = Weapon.Weapon(name = '2x Meltagun',
-                    count = 2,
+    meltagun = Weapon.Weapon(name = '4x Meltagun',
+                    count = 4,
                     attacks = 1,
                     skill = 3,
-                    strength = 9,
+                    strength = 10,
                     AP = -4,
                     damage = 'D6',
                     abilities = {'MELTA 2'})
     
-    bolt_pistol = Weapon.Weapon(name = '10x Bolt Pistol',
-                    count = 10,
-                    attacks = 1,
+    storm_bolter = Weapon.Weapon(name = '4x Storm Bolter',
+                    count = 4,
+                    attacks = 4,
                     skill = 3,
-                    strength = 4,
+                    strength = 5,
                     AP = 0,
-                    damage = 1,
-                    abilities = {'PISTOL'})
+                    damage = 2,
+                    abilities = {'RAPID FIRE 2'})
 
     # Create units
-    bss = Unit.Unit(name = '10xBSS',
+    doms = Unit.Unit(name = '10xDominions',
                model_count = 10,
                toughness = 3,
                wounds = 1,
                armor = 3,
                invul = None,
                keywords = {'INFANTRY'},
-               weapons =  {bolter, bolt_pistol, flamer, meltagun})
+               weapons =  {bolter, storm_bolter, flamer, meltagun})
     
 
     # Defender defaults
@@ -126,14 +126,23 @@ def initialize():
                invul = None,
                keywords = {'VEHICLE'},
                weapons =  {})
+    
+    d_KEQ = Unit.Unit(name = '1x KEQ',
+               model_count = 1,
+               toughness = 12,
+               wounds = 22,
+               armor = 2,
+               invul = 5,
+               keywords = {'VEHICLE', 'TITANIC'},
+               weapons =  {})
 
     # pretty_bolter = json.dumps(bolter.report(), indent=4)
     # print(pretty_bolter)
     # pretty_bss = json.dumps(bss.report(), indent=4)
     # print(pretty_bss)
 
-    attacker_list = [bss]
-    defender_list = [d_GEQ, d_MEQ, d_TEQ, d_VEQ]
+    attacker_list = [doms]
+    defender_list = [d_GEQ, d_MEQ, d_TEQ, d_VEQ, d_KEQ]
 
     return attacker_list, defender_list
 # End initialize()
@@ -152,17 +161,14 @@ def create_weapon():
 def run_all(results_text, attacker_list, defender_list):
     results_dict = {}
     for attacker in attacker_list:
-        # print(attacker.name)
         if attacker not in results_dict:
             results_dict[attacker.name] = {}
 
         for weapon in attacker.weapons:
-            # print(f'\t{weapon.name}')
             if weapon not in results_dict[attacker.name]:
                 results_dict[attacker.name][weapon.name] = {}
 
             for defender in defender_list:
-                # print(f'\t\t{defender.name}')
                 if weapon not in results_dict[attacker.name][weapon.name]:
                     results_dict[attacker.name][weapon.name][defender.name] = {}
 
@@ -177,10 +183,27 @@ def run_all(results_text, attacker_list, defender_list):
 
                 avg_slain = calc.calc_slain_avg(avg_unsaved, weapon, defender)
                 results_dict[attacker.name][weapon.name][defender.name]['Avg Slain'] = avg_slain
+
     
+    table = PrettyTable()
+    header_row = ['Weapon']
+
+    for defender in defender_list:
+        header_row.append(defender.name)
+
+    table.field_names = header_row
+
+    for attacker in results_dict:
+        for weapon in results_dict[f'{attacker}']:
+            row = [f'{weapon}']
+            for defender in results_dict[f'{attacker}'][f'{weapon}']:
+                row.append(results_dict[f'{attacker}'][f'{weapon}'][f'{defender}']['Avg Slain'])
+            table.add_row(row)
+    # print(table)
+
     results_text.config(state = 'normal')
     results_text.delete('1.0', tk.END)
-    results_text.insert('1.0', results_dict)
+    results_text.insert('1.0', table)
     results_text.see(tk.END)
     results_text.config(state = 'disabled')
 # End run_all()
