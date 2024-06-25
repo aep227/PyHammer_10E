@@ -130,6 +130,9 @@ def calc_hits_avg(weapon, defender, half_range, indirect, stationary):
         elif mod_skill > 6:
             mod_skill = 6
 
+    # Removes the 6s that already wounded
+    if 'LETHAL HITS' in weapon.abilities:
+        mod_skill += 1
 
     # Determine rerolls
     if 'REROLL ONES HITS' in weapon.abilities:
