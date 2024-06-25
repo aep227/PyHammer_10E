@@ -223,8 +223,8 @@ def run_all(results_text, attacker_list, defender_list,
     results_text.config(state = 'disabled')
 # End run_all()
 
-# TO-DO: Change attacker_list to a single attacker
-def run_attacker(results_text, attacker_list, defender_list, weapon_listbox, G_SELECTED_ATTACKER,
+
+def run_attacker(results_text, attacker_list, defender_list, G_SELECTED_ATTACKER,
                  half_range, indirect, stationary, charged, cover):
     attacker = attacker_list[G_SELECTED_ATTACKER]
     results_dict = {}
@@ -232,10 +232,8 @@ def run_attacker(results_text, attacker_list, defender_list, weapon_listbox, G_S
     table = PrettyTable()
     table.set_style(SINGLE_BORDER)
     header_row = ['Weapon']
-
     for defender in defender_list:
         header_row.append(defender.name)
-
     table.field_names = header_row
 
     for weapon in attacker.weapons:
@@ -280,11 +278,61 @@ def run_attacker(results_text, attacker_list, defender_list, weapon_listbox, G_S
 # End run_attacker()
 
 # TO-DO: Change attacker_list to a single weapon
-def run_weapon(results_text, attacker_list, defender_list,
+def run_weapon(results_text, attacker_list, defender_list, weapon_listbox, G_SELECTED_ATTACKER, G_SELECTED_WEAPON,
                half_range, indirect, stationary, charged, cover):
+    attacker = attacker_list[G_SELECTED_ATTACKER]
+    print(f'selected weapon in run_weapon: {G_SELECTED_WEAPON}')
+    for weapon_check in attacker.weapons:
+        w_listbox_check = weapon_listbox.get(G_SELECTED_WEAPON)
+        # print(f'weapon_check: {weapon_check}')
+        # print(f'weapon_check.name: {weapon_check.name}')
+        # print(f'w_listbox_check: {w_listbox_check}\n')
+        if w_listbox_check == weapon_check.name:
+            # print(f'matched w_listbox_check and {weapon_check.name}')
+            weapon = weapon_check
+    results_dict = {}
+    results_dict[attacker.name] = {}
+    results_dict[attacker.name][weapon.name] = {}
+    table = PrettyTable()
+    table.set_style(SINGLE_BORDER)
+    header_row = ['Weapon']
+    for defender in defender_list:
+        header_row.append(defender.name)
+    table.field_names = header_row
+
+    for defender in defender_list:
+        if weapon not in results_dict[attacker.name][weapon.name]:
+            results_dict[attacker.name][weapon.name][defender.name] = {}
+
+        avg_hits, avg_lethals = calc.calc_hits_avg(weapon, defender, 
+                                                    half_range, indirect, stationary)
+        results_dict[attacker.name][weapon.name][defender.name]['Avg Hits'] = avg_hits
+
+        avg_wounds, avg_dev_wounds = calc.calc_wounds_avg(avg_hits, avg_lethals, weapon, defender,
+                                                            charged)
+        results_dict[attacker.name][weapon.name][defender.name]['Avg Wounds'] = avg_wounds
+
+        avg_unsaved = calc.calc_unsaved_avg(avg_wounds, avg_dev_wounds, weapon, defender,
+                                            cover)
+        results_dict[attacker.name][weapon.name][defender.name]['Avg Unsaved'] = avg_unsaved
+
+        avg_slain = calc.calc_slain_avg(avg_unsaved, weapon, defender)
+        results_dict[attacker.name][weapon.name][defender.name]['Avg Slain'] = avg_slain
+    
+    attacker_title = [f'{attacker.name}']
+    for defender in defender_list:
+        attacker_title.append('')
+    table.add_row(attacker_title)
+
+    for weapon in results_dict[f'{attacker.name}']:
+        row = [f'{weapon}']
+        for defender in results_dict[f'{attacker.name}'][f'{weapon}']:
+            row.append(results_dict[f'{attacker.name}'][f'{weapon}'][f'{defender}']['Avg Slain'])
+        table.add_row(row)
+
     results_text.config(state = 'normal')
     results_text.delete('1.0', tk.END)
-    results_text.insert('1.0', 'In run_weapon()')
+    results_text.insert('1.0', table)
     results_text.see(tk.END)
     results_text.config(state = 'disabled')
 # End run_weapon()
@@ -310,8 +358,8 @@ def attacker_select(event, G_SELECTED_ATTACKER, attacker_listbox, attacker_list,
 def weapon_select(event, G_SELECTED_ATTACKER, G_SELECTED_WEAPON, 
                   weapon_listbox, attacker_list, weapon_stats_listbox):
     if weapon_listbox.curselection() != ():
-        G_SELECTED_WEAPON = weapon_listbox.curselection()[0]
-        selected_weapon_name = weapon_listbox.get(G_SELECTED_WEAPON)
+        G_SELECTED_WEAPON.set(weapon_listbox.curselection()[0])
+        selected_weapon_name = weapon_listbox.get(G_SELECTED_WEAPON.get())
 
         attacker = attacker_list[G_SELECTED_ATTACKER]
         for weapon in attacker.weapons:
@@ -341,8 +389,8 @@ def defender_select(event, G_SELECTED_DEFENDER, defender_listbox, defender_list,
         for keyword in defender_list[G_SELECTED_DEFENDER].keywords:
             defender_stats_listbox.insert(f'{sub_index}', f'{keyword}')
             sub_index += 1
-
 # End defender_select()
+
 
 def thread_run_all(results_text, attacker_list, defender_list,
                    half_range, indirect, stationary, charged, cover):
@@ -354,21 +402,22 @@ def thread_run_all(results_text, attacker_list, defender_list,
 # End thread_run_all()
 
 
-def thread_run_attacker(results_text, attacker_list, defender_list, weapon_listbox, G_SELECTED_ATTACKER,
+def thread_run_attacker(results_text, attacker_list, defender_list, G_SELECTED_ATTACKER,
                         half_range, indirect, stationary, charged, cover):
     """ Creates the sub-thread to run the selected attacker against all defenders """
 
-    t2 = threading.Thread(target = run_attacker, args = (results_text, attacker_list, defender_list, weapon_listbox, G_SELECTED_ATTACKER,
+    t2 = threading.Thread(target = run_attacker, args = (results_text, attacker_list, defender_list, G_SELECTED_ATTACKER,
                                                          half_range, indirect, stationary, charged, cover))
     t2.start()
 # End thread_run_attacker()
 
 
-def thread_run_weapon(results_text, attacker_list, defender_list,
+def thread_run_weapon(results_text, attacker_list, defender_list, weapon_listbox, G_SELECTED_ATTACKER, G_SELECTED_WEAPON,
                       half_range, indirect, stationary, charged, cover):
     """ Creates the sub-thread to run the selected weapon against all defenders """
 
-    t3 = threading.Thread(target = run_weapon, args = (results_text, attacker_list, defender_list,
+    t3 = threading.Thread(target = run_weapon, args = (results_text, attacker_list, defender_list, weapon_listbox,
+                                                       G_SELECTED_ATTACKER, G_SELECTED_WEAPON,
                                                        half_range, indirect, stationary, charged, cover))
     t3.start()
 # End thread_run_weapon()
@@ -456,17 +505,20 @@ def main():
     calculate_frame = ttk.Frame(root, style = 'default.TFrame')
     calculate_all = ttk.Button(calculate_frame, text = 'Calculate All',
                                command = lambda: thread_run_all(results_text, attacker_list, defender_list,
-                                                 G_HALF_RANGE.get(), G_INDIRECT.get(), G_STATIONARY.get(), G_CHARGED.get(), G_COVER.get()),
+                                                                G_HALF_RANGE.get(), G_INDIRECT.get(), G_STATIONARY.get(),
+                                                                G_CHARGED.get(), G_COVER.get()),
                                style = 'default.TButton')
     calculate_attacker = ttk.Button(calculate_frame,
                                     text = 'Calculate Attacker',
-                                    command = lambda: thread_run_attacker(results_text, attacker_list, defender_list, weapon_listbox, G_SELECTED_ATTACKER.get(),
-                                                      G_HALF_RANGE.get(), G_INDIRECT.get(), G_STATIONARY.get(), G_CHARGED.get(), G_COVER.get()),
+                                    command = lambda: thread_run_attacker(results_text, attacker_list, defender_list,
+                                                                          G_SELECTED_ATTACKER.get(), G_HALF_RANGE.get(),
+                                                                          G_INDIRECT.get(), G_STATIONARY.get(), G_CHARGED.get(), G_COVER.get()),
                                     style = 'default.TButton')
     calculate_weapon = ttk.Button(calculate_frame,
                                   text = 'Calculate Weapon',
-                                  command = lambda: thread_run_weapon(results_text, attacker_list, defender_list,
-                                                    G_HALF_RANGE.get(), G_INDIRECT.get(), G_STATIONARY.get(), G_CHARGED.get(), G_COVER.get()),
+                                  command = lambda: thread_run_weapon(results_text, attacker_list, defender_list, weapon_listbox, G_SELECTED_ATTACKER.get(),
+                                                                      G_SELECTED_WEAPON.get(), G_HALF_RANGE.get(), G_INDIRECT.get(), G_STATIONARY.get(),
+                                                                      G_CHARGED.get(), G_COVER.get()),
                                   style = 'default.TButton')
 
 
