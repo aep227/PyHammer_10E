@@ -22,15 +22,6 @@ def initialize():
                     damage = 1,
                     abilities = {'RAPID FIRE 1'})
     
-    bolterX10 = Weapon.Weapon(name = '10x Bolter',
-                    count = 10,
-                    attacks = 1,
-                    skill = 3,
-                    strength = 5,
-                    AP = 0,
-                    damage = 1,
-                    abilities = {'RAPID FIRE 1'})
-    
     flamerX4 = Weapon.Weapon(name = '4x Flamer',
                     count = 4,
                     attacks = 'D6',
@@ -69,7 +60,7 @@ def initialize():
     
     multi_meltaX4 = Weapon.Weapon(name = '4x Multimeltas',
                     count = 4,
-                    attacks = 1,
+                    attacks = 2,
                     skill = 4,
                     strength = 10,
                     AP = -4,
@@ -84,6 +75,33 @@ def initialize():
                     AP = -1,
                     damage = 1,
                     abilities = {'TORRENT', 'IGNORES COVER'})
+    
+    paragon_MM = Weapon.Weapon(name = '3x Multimeltas',
+                    count = 3,
+                    attacks = 2,
+                    skill = 2,
+                    strength = 10,
+                    AP = -4,
+                    damage = 'D6',
+                    abilities = {'MELTA 2', 'LANCE'})
+    
+    paragon_krak = Weapon.Weapon(name = '3x Krak Grenades',
+                    count = 3,
+                    attacks = 1,
+                    skill = 2,
+                    strength = 10,
+                    AP = -2,
+                    damage = 'D3',
+                    abilities = {'TWIN-LINKED', 'LANCE'})
+    
+    exorcist_missiles = Weapon.Weapon(name = 'Exorcist Missiles',
+                    count = 1,
+                    attacks = 'D6_PLUS_2',
+                    skill = 3,
+                    strength = 11,
+                    AP = -3,
+                    damage = 'D6',
+                    abilities = {'INDIRECT FIRE'})
 
     # Create units
     doms = Unit.Unit(name = '10x Dominions',
@@ -91,27 +109,36 @@ def initialize():
                toughness = 3,
                wounds = 1,
                armor = 3,
-               invul = None,
+               invul = 6,
                keywords = {'INFANTRY'},
                weapons =  {bolterX5, storm_bolterX4, flamerX4, meltagunX4})
-    
-    bss = Unit.Unit(name = '10x BSS',
-               model_count = 10,
-               toughness = 3,
-               wounds = 1,
-               armor = 3,
-               invul = None,
-               keywords = {'INFANTRY'},
-               weapons =  {bolterX10})
     
     rets = Unit.Unit(name = '5x Rets',
                model_count = 5,
                toughness = 3,
                wounds = 1,
                armor = 3,
-               invul = None,
+               invul = 6,
                keywords = {'INFANTRY'},
                weapons =  {heavy_bolterX4, multi_meltaX4, heavy_flamerX4})
+    
+    paragons = Unit.Unit(name = '3x Paragons',
+               model_count = 3,
+               toughness = 7,
+               wounds = 4,
+               armor = 2,
+               invul = 4,
+               keywords = {'VEHICLE', 'WALKER'},
+               weapons =  {paragon_MM, paragon_krak})
+    
+    exorcist = Unit.Unit(name = 'Exorcist',
+               model_count = 1,
+               toughness = 10,
+               wounds = 11,
+               armor = 3,
+               invul = 6,
+               keywords = {'VEHICLE'},
+               weapons =  {exorcist_missiles})
     
 
     # Defender defaults
@@ -160,7 +187,7 @@ def initialize():
                keywords = {'VEHICLE', 'TITANIC'},
                weapons =  {})
 
-    attacker_list = [doms, bss, rets]
+    attacker_list = [doms, rets, paragons, exorcist]
     defender_list = [d_GEQ, d_MEQ, d_TEQ, d_VEQ, d_KEQ]
 
     return attacker_list, defender_list

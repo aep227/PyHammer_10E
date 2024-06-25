@@ -26,6 +26,8 @@ RANDOM_VALUE_AVGS = {
     'D6': 3.5,
     '2D6': 7,
     'D3_PLUS_3': 5,
+    'D6_PLUS_1': 4.5,
+    'D6_PLUS_2': 5.5,
     'D6_PLUS_3': 6.5,
     'D6_PLUS_6': 9.5,
 }
