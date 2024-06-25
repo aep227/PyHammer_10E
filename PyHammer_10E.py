@@ -5,337 +5,13 @@
 # Start Date: 5/31/2024                         #
 #################################################
 
-import Weapon
-import Unit
+import data_manage as data_man
 import calc_functions as calc
+import calculation_run_func as calc_run
 import tkinter as tk
 import tkinter.ttk as ttk
 import subprocess
 import threading
-from prettytable import PrettyTable
-from prettytable import SINGLE_BORDER
-
-
-def initialize():
-    """ 
-    Set up Unit and Weapon instances
-     
-    returns - list of units
-    """
-
-    # Create weapons first
-    bolterX5 = Weapon.Weapon(name = '5x Bolter',
-                    count = 5,
-                    attacks = 1,
-                    skill = 3,
-                    strength = 5,
-                    AP = 0,
-                    damage = 1,
-                    abilities = {'RAPID FIRE 1'})
-    
-    bolterX10 = Weapon.Weapon(name = '10x Bolter',
-                    count = 10,
-                    attacks = 1,
-                    skill = 3,
-                    strength = 4,
-                    AP = 0,
-                    damage = 1,
-                    abilities = {'RAPID FIRE 1'})
-    
-    flamerX4 = Weapon.Weapon(name = '4x Flamer',
-                    count = 4,
-                    attacks = 'D6',
-                    skill = 3,
-                    strength = 6,
-                    AP = 0,
-                    damage = 1,
-                    abilities = {'TORRENT', 'IGNORES COVER'})
-    
-    meltagunX4 = Weapon.Weapon(name = '4x Meltagun',
-                    count = 4,
-                    attacks = 1,
-                    skill = 3,
-                    strength = 10,
-                    AP = -4,
-                    damage = 'D6',
-                    abilities = {'MELTA 2'})
-    
-    storm_bolterX4 = Weapon.Weapon(name = '4x Storm Bolter',
-                    count = 4,
-                    attacks = 2,
-                    skill = 3,
-                    strength = 5,
-                    AP = 0,
-                    damage = 2,
-                    abilities = {'RAPID FIRE 2'})
-
-    # Create units
-    doms = Unit.Unit(name = '10x Dominions',
-               model_count = 10,
-               toughness = 3,
-               wounds = 1,
-               armor = 3,
-               invul = None,
-               keywords = {'INFANTRY'},
-               weapons =  {bolterX5, storm_bolterX4, flamerX4, meltagunX4})
-    
-    bss = Unit.Unit(name = '10x BSS',
-               model_count = 10,
-               toughness = 3,
-               wounds = 1,
-               armor = 3,
-               invul = None,
-               keywords = {'INFANTRY'},
-               weapons =  {bolterX10})
-    
-
-    # Defender defaults
-    d_GEQ = Unit.Unit(name = '10x GEQ',
-               model_count = 10,
-               toughness = 3,
-               wounds = 1,
-               armor = 5,
-               invul = None,
-               keywords = {'INFANTRY'},
-               weapons =  {})
-    
-    d_MEQ = Unit.Unit(name = '5x MEQ',
-               model_count = 5,
-               toughness = 4,
-               wounds = 2,
-               armor = 3,
-               invul = None,
-               keywords = {'INFANTRY'},
-               weapons =  {})
-    
-    d_TEQ = Unit.Unit(name = '5x TEQ',
-               model_count = 5,
-               toughness = 5,
-               wounds = 3,
-               armor = 2,
-               invul = 4,
-               keywords = {'INFANTRY'},
-               weapons =  {})
-    
-    d_VEQ = Unit.Unit(name = '1x VEQ',
-               model_count = 1,
-               toughness = 10,
-               wounds = 12,
-               armor = 3,
-               invul = None,
-               keywords = {'VEHICLE'},
-               weapons =  {})
-    
-    d_KEQ = Unit.Unit(name = '1x KEQ',
-               model_count = 1,
-               toughness = 12,
-               wounds = 22,
-               armor = 2,
-               invul = 5,
-               keywords = {'VEHICLE', 'TITANIC'},
-               weapons =  {})
-
-    attacker_list = [doms, bss]
-    defender_list = [d_GEQ, d_MEQ, d_TEQ, d_VEQ, d_KEQ]
-
-    return attacker_list, defender_list
-# End initialize()
-
-
-def create_unit():
-    pass
-# End create_unit()
-
-
-def create_weapon():
-    pass
-# End create_weapon()
-
-
-def run_all(results_text, attacker_list, defender_list,
-            half_range, indirect, stationary, charged, cover):
-    results_dict = {}
-    for attacker in attacker_list:
-        if attacker not in results_dict:
-            results_dict[attacker.name] = {}
-
-        for weapon in attacker.weapons:
-            if weapon not in results_dict[attacker.name]:
-                results_dict[attacker.name][weapon.name] = {}
-
-            for defender in defender_list:
-                if weapon not in results_dict[attacker.name][weapon.name]:
-                    results_dict[attacker.name][weapon.name][defender.name] = {}
-
-                avg_hits, avg_lethals = calc.calc_hits_avg(weapon, defender, 
-                                                           half_range, indirect, stationary)
-                results_dict[attacker.name][weapon.name][defender.name]['Avg Hits'] = avg_hits
-    
-                avg_wounds, avg_dev_wounds = calc.calc_wounds_avg(avg_hits, avg_lethals, weapon, defender,
-                                                                  charged)
-                results_dict[attacker.name][weapon.name][defender.name]['Avg Wounds'] = avg_wounds
-
-                avg_unsaved = calc.calc_unsaved_avg(avg_wounds, avg_dev_wounds, weapon, defender,
-                                                    cover)
-                results_dict[attacker.name][weapon.name][defender.name]['Avg Unsaved'] = avg_unsaved
-
-                avg_slain = calc.calc_slain_avg(avg_unsaved, weapon, defender)
-                results_dict[attacker.name][weapon.name][defender.name]['Avg Slain'] = avg_slain
-
-    
-    table = PrettyTable()
-    table.set_style(SINGLE_BORDER)
-    header_row = ['Weapon']
-
-    for defender in defender_list:
-        header_row.append(defender.name)
-
-    table.field_names = header_row
-
-    attacker_index = 1
-    for attacker in results_dict:
-        # Attacker divider
-        attacker_title = [f'{attacker}']
-        for defender in defender_list:
-            attacker_title.append('')
-        table.add_row(attacker_title)
-
-        for weapon in results_dict[f'{attacker}']:
-            row = [f'{weapon}']
-            for defender in results_dict[f'{attacker}'][f'{weapon}']:
-                row.append(results_dict[f'{attacker}'][f'{weapon}'][f'{defender}']['Avg Slain'])
-            table.add_row(row)
-        
-        # Blank row for next attacker
-        if len(results_dict.keys()) > 1 and attacker_index != len(results_dict.keys()):
-            blank_row = [f'']
-            for defender in defender_list:
-                blank_row.append('')
-            table.add_row(blank_row)
-            attacker_index += 1
-        
-    # print(table)
-
-    results_text.config(state = 'normal')
-    results_text.delete('1.0', tk.END)
-    results_text.insert('1.0', table)
-    results_text.see(tk.END)
-    results_text.config(state = 'disabled')
-# End run_all()
-
-
-def run_attacker(results_text, attacker_list, defender_list, G_SELECTED_ATTACKER,
-                 half_range, indirect, stationary, charged, cover):
-    attacker = attacker_list[G_SELECTED_ATTACKER]
-    results_dict = {}
-    results_dict[attacker.name] = {}
-    table = PrettyTable()
-    table.set_style(SINGLE_BORDER)
-    header_row = ['Weapon']
-    for defender in defender_list:
-        header_row.append(defender.name)
-    table.field_names = header_row
-
-    for weapon in attacker.weapons:
-        if weapon not in results_dict[attacker.name]:
-            results_dict[attacker.name][weapon.name] = {}
-
-        for defender in defender_list:
-            if weapon not in results_dict[attacker.name][weapon.name]:
-                results_dict[attacker.name][weapon.name][defender.name] = {}
-
-            avg_hits, avg_lethals = calc.calc_hits_avg(weapon, defender, 
-                                                        half_range, indirect, stationary)
-            results_dict[attacker.name][weapon.name][defender.name]['Avg Hits'] = avg_hits
-
-            avg_wounds, avg_dev_wounds = calc.calc_wounds_avg(avg_hits, avg_lethals, weapon, defender,
-                                                                charged)
-            results_dict[attacker.name][weapon.name][defender.name]['Avg Wounds'] = avg_wounds
-
-            avg_unsaved = calc.calc_unsaved_avg(avg_wounds, avg_dev_wounds, weapon, defender,
-                                                cover)
-            results_dict[attacker.name][weapon.name][defender.name]['Avg Unsaved'] = avg_unsaved
-
-            avg_slain = calc.calc_slain_avg(avg_unsaved, weapon, defender)
-            results_dict[attacker.name][weapon.name][defender.name]['Avg Slain'] = avg_slain
-    
-    attacker_title = [f'{attacker.name}']
-    for defender in defender_list:
-        attacker_title.append('')
-    table.add_row(attacker_title)
-
-    for weapon in results_dict[f'{attacker.name}']:
-        row = [f'{weapon}']
-        for defender in results_dict[f'{attacker.name}'][f'{weapon}']:
-            row.append(results_dict[f'{attacker.name}'][f'{weapon}'][f'{defender}']['Avg Slain'])
-        table.add_row(row)
-
-    results_text.config(state = 'normal')
-    results_text.delete('1.0', tk.END)
-    results_text.insert('1.0', table)
-    results_text.see(tk.END)
-    results_text.config(state = 'disabled')
-# End run_attacker()
-
-# TO-DO: Change attacker_list to a single weapon
-def run_weapon(results_text, attacker_list, defender_list, weapon_listbox, G_SELECTED_ATTACKER, G_SELECTED_WEAPON,
-               half_range, indirect, stationary, charged, cover):
-    attacker = attacker_list[G_SELECTED_ATTACKER]
-    print(f'selected weapon in run_weapon: {G_SELECTED_WEAPON}')
-    for weapon_check in attacker.weapons:
-        w_listbox_check = weapon_listbox.get(G_SELECTED_WEAPON)
-        # print(f'weapon_check: {weapon_check}')
-        # print(f'weapon_check.name: {weapon_check.name}')
-        # print(f'w_listbox_check: {w_listbox_check}\n')
-        if w_listbox_check == weapon_check.name:
-            # print(f'matched w_listbox_check and {weapon_check.name}')
-            weapon = weapon_check
-    results_dict = {}
-    results_dict[attacker.name] = {}
-    results_dict[attacker.name][weapon.name] = {}
-    table = PrettyTable()
-    table.set_style(SINGLE_BORDER)
-    header_row = ['Weapon']
-    for defender in defender_list:
-        header_row.append(defender.name)
-    table.field_names = header_row
-
-    for defender in defender_list:
-        if weapon not in results_dict[attacker.name][weapon.name]:
-            results_dict[attacker.name][weapon.name][defender.name] = {}
-
-        avg_hits, avg_lethals = calc.calc_hits_avg(weapon, defender, 
-                                                    half_range, indirect, stationary)
-        results_dict[attacker.name][weapon.name][defender.name]['Avg Hits'] = avg_hits
-
-        avg_wounds, avg_dev_wounds = calc.calc_wounds_avg(avg_hits, avg_lethals, weapon, defender,
-                                                            charged)
-        results_dict[attacker.name][weapon.name][defender.name]['Avg Wounds'] = avg_wounds
-
-        avg_unsaved = calc.calc_unsaved_avg(avg_wounds, avg_dev_wounds, weapon, defender,
-                                            cover)
-        results_dict[attacker.name][weapon.name][defender.name]['Avg Unsaved'] = avg_unsaved
-
-        avg_slain = calc.calc_slain_avg(avg_unsaved, weapon, defender)
-        results_dict[attacker.name][weapon.name][defender.name]['Avg Slain'] = avg_slain
-    
-    attacker_title = [f'{attacker.name}']
-    for defender in defender_list:
-        attacker_title.append('')
-    table.add_row(attacker_title)
-
-    for weapon in results_dict[f'{attacker.name}']:
-        row = [f'{weapon}']
-        for defender in results_dict[f'{attacker.name}'][f'{weapon}']:
-            row.append(results_dict[f'{attacker.name}'][f'{weapon}'][f'{defender}']['Avg Slain'])
-        table.add_row(row)
-
-    results_text.config(state = 'normal')
-    results_text.delete('1.0', tk.END)
-    results_text.insert('1.0', table)
-    results_text.see(tk.END)
-    results_text.config(state = 'disabled')
-# End run_weapon()
 
 
 
@@ -396,7 +72,7 @@ def thread_run_all(results_text, attacker_list, defender_list,
                    half_range, indirect, stationary, charged, cover):
     """ Creates the sub-thread to run all attackers against all defenders """
 
-    t1 = threading.Thread(target = run_all, args = (results_text, attacker_list, defender_list,
+    t1 = threading.Thread(target = calc_run.run_all, args = (results_text, attacker_list, defender_list,
                                                     half_range, indirect, stationary, charged, cover))
     t1.start()
 # End thread_run_all()
@@ -406,7 +82,7 @@ def thread_run_attacker(results_text, attacker_list, defender_list, G_SELECTED_A
                         half_range, indirect, stationary, charged, cover):
     """ Creates the sub-thread to run the selected attacker against all defenders """
 
-    t2 = threading.Thread(target = run_attacker, args = (results_text, attacker_list, defender_list, G_SELECTED_ATTACKER,
+    t2 = threading.Thread(target = calc_run.run_attacker, args = (results_text, attacker_list, defender_list, G_SELECTED_ATTACKER,
                                                          half_range, indirect, stationary, charged, cover))
     t2.start()
 # End thread_run_attacker()
@@ -416,7 +92,7 @@ def thread_run_weapon(results_text, attacker_list, defender_list, weapon_listbox
                       half_range, indirect, stationary, charged, cover):
     """ Creates the sub-thread to run the selected weapon against all defenders """
 
-    t3 = threading.Thread(target = run_weapon, args = (results_text, attacker_list, defender_list, weapon_listbox,
+    t3 = threading.Thread(target = calc_run.run_weapon, args = (results_text, attacker_list, defender_list, weapon_listbox,
                                                        G_SELECTED_ATTACKER, G_SELECTED_WEAPON,
                                                        half_range, indirect, stationary, charged, cover))
     t3.start()
@@ -424,7 +100,7 @@ def thread_run_weapon(results_text, attacker_list, defender_list, weapon_listbox
 
 
 def main():
-    attacker_list, defender_list = initialize()
+    attacker_list, defender_list = data_man.initialize()
     # results_dict = run_all(attacker_list, defender_list)
 
 
