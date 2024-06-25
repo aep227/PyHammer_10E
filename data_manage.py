@@ -103,8 +103,8 @@ def initialize():
                     damage = 'D6',
                     abilities = {'INDIRECT FIRE'})
     
-    sac_mace = Weapon.Weapon(name = 'Sacresant Maces',
-                    count = 5,
+    AP1_mace = Weapon.Weapon(name = 'AP-1 Maces',
+                    count = 10,
                     attacks = 3,
                     skill = 3,
                     strength = 4,
@@ -112,12 +112,39 @@ def initialize():
                     damage = 2,
                     abilities = {'LETHAL HITS'})
     
-    sac_halberd = Weapon.Weapon(name = 'Sacresant Halberds',
-                    count = 5,
+    AP2_mace = Weapon.Weapon(name = 'AP-2 Maces',
+                    count = 10,
+                    attacks = 3,
+                    skill = 3,
+                    strength = 4,
+                    AP = -2,
+                    damage = 2,
+                    abilities = {'LETHAL HITS'})
+    
+    AP2_halberd = Weapon.Weapon(name = 'AP-2 Halberds',
+                    count = 10,
                     attacks = 3,
                     skill = 3,
                     strength = 5,
                     AP = -2,
+                    damage = 1,
+                    abilities = {'SUSTAINED HITS 1'})
+    
+    AP3_halberd = Weapon.Weapon(name = 'AP-3 Halberds',
+                    count = 10,
+                    attacks = 3,
+                    skill = 3,
+                    strength = 5,
+                    AP = -3,
+                    damage = 1,
+                    abilities = {'SUSTAINED HITS 1'})
+    
+    arco_flails = Weapon.Weapon(name = '10x Arco Flails',
+                    count = 10,
+                    attacks = 4,
+                    skill = 4,
+                    strength = 5,
+                    AP = 0,
                     damage = 1,
                     abilities = {'SUSTAINED HITS 1'})
 
@@ -158,14 +185,23 @@ def initialize():
                keywords = {'VEHICLE'},
                weapons =  {exorcist_missiles})
     
-    sacsX5 = Unit.Unit(name = '5x Sacresants',
+    sacsX10 = Unit.Unit(name = '10x Sacresants',
                model_count = 5,
                toughness = 3,
                wounds = 1,
                armor = 3,
                invul = 4,
                keywords = {'INFANTRY'},
-               weapons =  {sac_mace, sac_halberd})
+               weapons =  {AP1_mace, AP2_mace, AP2_halberd, AP3_halberd})
+    
+    arcosX10 = Unit.Unit(name = '10x Arcos',
+               model_count = 10,
+               toughness = 3,
+               wounds = 2,
+               armor = 7,
+               invul = 6,
+               keywords = {'INFANTRY'},
+               weapons =  {arco_flails})
     
 
     # Defender defaults
@@ -214,7 +250,7 @@ def initialize():
                keywords = {'VEHICLE', 'TITANIC'},
                weapons =  {})
 
-    attacker_list = [doms, rets, paragons, exorcist, sacsX5]
+    attacker_list = [doms, rets, paragons, exorcist, sacsX10, arcosX10]
     defender_list = [d_GEQ, d_MEQ, d_TEQ, d_VEQ, d_KEQ]
 
     return attacker_list, defender_list
