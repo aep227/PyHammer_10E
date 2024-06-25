@@ -102,6 +102,24 @@ def initialize():
                     AP = -3,
                     damage = 'D6',
                     abilities = {'INDIRECT FIRE'})
+    
+    sac_mace = Weapon.Weapon(name = 'Sacresant Maces',
+                    count = 5,
+                    attacks = 3,
+                    skill = 3,
+                    strength = 4,
+                    AP = -1,
+                    damage = 2,
+                    abilities = {'LETHAL HITS'})
+    
+    sac_halberd = Weapon.Weapon(name = 'Sacresant Halberds',
+                    count = 5,
+                    attacks = 3,
+                    skill = 3,
+                    strength = 5,
+                    AP = -2,
+                    damage = 1,
+                    abilities = {'SUSTAINED HITS 1'})
 
     # Create units
     doms = Unit.Unit(name = '10x Dominions',
@@ -139,6 +157,15 @@ def initialize():
                invul = 6,
                keywords = {'VEHICLE'},
                weapons =  {exorcist_missiles})
+    
+    sacsX5 = Unit.Unit(name = '5x Sacresants',
+               model_count = 5,
+               toughness = 3,
+               wounds = 1,
+               armor = 3,
+               invul = 4,
+               keywords = {'INFANTRY'},
+               weapons =  {sac_mace, sac_halberd})
     
 
     # Defender defaults
@@ -187,7 +214,7 @@ def initialize():
                keywords = {'VEHICLE', 'TITANIC'},
                weapons =  {})
 
-    attacker_list = [doms, rets, paragons, exorcist]
+    attacker_list = [doms, rets, paragons, exorcist, sacsX5]
     defender_list = [d_GEQ, d_MEQ, d_TEQ, d_VEQ, d_KEQ]
 
     return attacker_list, defender_list
