@@ -7,17 +7,17 @@ P4 = 0.500
 P5 = 0.333
 P6 = 0.167
 # Probabilties, rerolling 1s
-P2_RR1 = 0.833
-P3_RR1 = 0.667
-P4_RR1 = 0.500
-P5_RR1 = 0.333
-P6_RR1 = 0.167
+P2_RR1 = 0.972
+P3_RR1 = 0.778
+P4_RR1 = 0.583
+P5_RR1 = 0.389
+P6_RR1 = 0.195
 # Probabilities, rerolling all
-P2_RRA = 0.833
-P3_RRA = 0.667
-P4_RRA = 0.500
-P5_RRA = 0.333
-P6_RRA = 0.167
+P2_RRA = 0.972
+P3_RRA = 0.889
+P4_RRA = 0.750
+P5_RRA = 0.556
+P6_RRA = 0.306
 
 # Random value averages
 RANDOM_VALUE_AVGS = {
