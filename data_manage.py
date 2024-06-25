@@ -147,6 +147,15 @@ def initialize():
                     AP = 0,
                     damage = 1,
                     abilities = {'SUSTAINED HITS 1'})
+    
+    twin_buzz_blades = Weapon.Weapon(name = 'Twin Buzz Blades',
+                    count = 1,
+                    attacks = 4,
+                    skill = 3,
+                    strength = 10,
+                    AP = -3,
+                    damage = 2,
+                    abilities = {'SUSTAINED HITS 1', 'TWIN-LINKED'})
 
     # Create units
     doms = Unit.Unit(name = '10x Dominions',
@@ -203,6 +212,15 @@ def initialize():
                keywords = {'INFANTRY'},
                weapons =  {arco_flails})
     
+    mortifierX1 = Unit.Unit(name = '1x Mortifier',
+               model_count = 1,
+               toughness = 6,
+               wounds = 5,
+               armor = 3,
+               invul = 6,
+               keywords = {'INFANTRY'},
+               weapons =  {twin_buzz_blades})
+    
 
     # Defender defaults
     d_GEQ = Unit.Unit(name = '10x GEQ',
@@ -250,7 +268,7 @@ def initialize():
                keywords = {'VEHICLE', 'TITANIC'},
                weapons =  {})
 
-    attacker_list = [doms, rets, paragons, exorcist, sacsX10, arcosX10]
+    attacker_list = [doms, rets, paragons, exorcist, sacsX10, arcosX10, mortifierX1]
     defender_list = [d_GEQ, d_MEQ, d_TEQ, d_VEQ, d_KEQ]
 
     return attacker_list, defender_list
