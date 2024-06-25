@@ -1,5 +1,3 @@
-import Weapon
-import Unit
 import calc_functions as calc
 import tkinter as tk
 import tkinter.ttk as ttk
