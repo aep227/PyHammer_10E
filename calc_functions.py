@@ -92,7 +92,7 @@ def calc_hits_avg(weapon, defender, half_range, indirect, stationary):
             lethals = 0
         
         if 'SUSTAINED HITS' in ability:
-            value = ability[:-2].strip()
+            value = ability[-2:].strip()
             if value == 'D3':
                 value = 2
             sustained = (attacks * P6) * int(value)

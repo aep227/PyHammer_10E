@@ -14,6 +14,16 @@ Abilities that affect the math:
 - indicates not added
 + indicates added but not tested
 
+
+Checkbox options:
+- Attacker re-roll 1s to hit
+- Attacker re-roll all to hit
+- Attacker re-roll all to hit, fishing for 6s
+- Attacker re-roll 1s to wound
+- Attacker re-roll all to wound
+- Attacker re-roll all to wound, fishing for 6s
+
+
 Weapons:
 Hit roll:
 + Rapid Fire X
@@ -30,12 +40,12 @@ Wound roll:
 - Anti-Keyword X+ (Infantry, Monster, Vehicle, Titanic)
 
 Save roll:
-- Ignores Cover
++ Ignores Cover
 
 - Melta X
-- Indirect Fire
++ Indirect Fire
 
 Defensive:
 - Feel No Pain
-- Stealth
-- Cover
++ Stealth
++ Cover

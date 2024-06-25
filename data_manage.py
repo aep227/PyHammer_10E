@@ -26,7 +26,7 @@ def initialize():
                     count = 10,
                     attacks = 1,
                     skill = 3,
-                    strength = 4,
+                    strength = 5,
                     AP = 0,
                     damage = 1,
                     abilities = {'RAPID FIRE 1'})
@@ -57,6 +57,33 @@ def initialize():
                     AP = 0,
                     damage = 2,
                     abilities = {'RAPID FIRE 2'})
+    
+    heavy_bolterX4 = Weapon.Weapon(name = '4x Heavy Bolters',
+                    count = 4,
+                    attacks = 3,
+                    skill = 4,
+                    strength = 6,
+                    AP = -1,
+                    damage = 2,
+                    abilities = {'HEAVY', 'SUSTAINED HITS 1'})
+    
+    multi_meltaX4 = Weapon.Weapon(name = '4x Multimeltas',
+                    count = 4,
+                    attacks = 1,
+                    skill = 4,
+                    strength = 10,
+                    AP = -4,
+                    damage = 'D6',
+                    abilities = {'HEAVY', 'MELTA 2'})
+    
+    heavy_flamerX4 = Weapon.Weapon(name = '4x Heavy Flamers',
+                    count = 4,
+                    attacks = 'D6',
+                    skill = 3,
+                    strength = 7,
+                    AP = -1,
+                    damage = 1,
+                    abilities = {'TORRENT', 'IGNORES COVER'})
 
     # Create units
     doms = Unit.Unit(name = '10x Dominions',
@@ -76,6 +103,15 @@ def initialize():
                invul = None,
                keywords = {'INFANTRY'},
                weapons =  {bolterX10})
+    
+    rets = Unit.Unit(name = '5x Rets',
+               model_count = 5,
+               toughness = 3,
+               wounds = 1,
+               armor = 3,
+               invul = None,
+               keywords = {'INFANTRY'},
+               weapons =  {heavy_bolterX4, multi_meltaX4, heavy_flamerX4})
     
 
     # Defender defaults
@@ -124,7 +160,7 @@ def initialize():
                keywords = {'VEHICLE', 'TITANIC'},
                weapons =  {})
 
-    attacker_list = [doms, bss]
+    attacker_list = [doms, bss, rets]
     defender_list = [d_GEQ, d_MEQ, d_TEQ, d_VEQ, d_KEQ]
 
     return attacker_list, defender_list
