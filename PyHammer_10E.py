@@ -224,11 +224,57 @@ def run_all(results_text, attacker_list, defender_list,
 # End run_all()
 
 # TO-DO: Change attacker_list to a single attacker
-def run_attacker(results_text, attacker_list, defender_list,
+def run_attacker(results_text, attacker_list, defender_list, weapon_listbox, G_SELECTED_ATTACKER,
                  half_range, indirect, stationary, charged, cover):
+    attacker = attacker_list[G_SELECTED_ATTACKER]
+    results_dict = {}
+    results_dict[attacker.name] = {}
+    table = PrettyTable()
+    table.set_style(SINGLE_BORDER)
+    header_row = ['Weapon']
+
+    for defender in defender_list:
+        header_row.append(defender.name)
+
+    table.field_names = header_row
+
+    for weapon in attacker.weapons:
+        if weapon not in results_dict[attacker.name]:
+            results_dict[attacker.name][weapon.name] = {}
+
+        for defender in defender_list:
+            if weapon not in results_dict[attacker.name][weapon.name]:
+                results_dict[attacker.name][weapon.name][defender.name] = {}
+
+            avg_hits, avg_lethals = calc.calc_hits_avg(weapon, defender, 
+                                                        half_range, indirect, stationary)
+            results_dict[attacker.name][weapon.name][defender.name]['Avg Hits'] = avg_hits
+
+            avg_wounds, avg_dev_wounds = calc.calc_wounds_avg(avg_hits, avg_lethals, weapon, defender,
+                                                                charged)
+            results_dict[attacker.name][weapon.name][defender.name]['Avg Wounds'] = avg_wounds
+
+            avg_unsaved = calc.calc_unsaved_avg(avg_wounds, avg_dev_wounds, weapon, defender,
+                                                cover)
+            results_dict[attacker.name][weapon.name][defender.name]['Avg Unsaved'] = avg_unsaved
+
+            avg_slain = calc.calc_slain_avg(avg_unsaved, weapon, defender)
+            results_dict[attacker.name][weapon.name][defender.name]['Avg Slain'] = avg_slain
+    
+    attacker_title = [f'{attacker.name}']
+    for defender in defender_list:
+        attacker_title.append('')
+    table.add_row(attacker_title)
+
+    for weapon in results_dict[f'{attacker.name}']:
+        row = [f'{weapon}']
+        for defender in results_dict[f'{attacker.name}'][f'{weapon}']:
+            row.append(results_dict[f'{attacker.name}'][f'{weapon}'][f'{defender}']['Avg Slain'])
+        table.add_row(row)
+
     results_text.config(state = 'normal')
     results_text.delete('1.0', tk.END)
-    results_text.insert('1.0', 'In run_attacker()')
+    results_text.insert('1.0', table)
     results_text.see(tk.END)
     results_text.config(state = 'disabled')
 # End run_attacker()
@@ -250,52 +296,49 @@ def run_weapon(results_text, attacker_list, defender_list,
 #        GUI Functions        #
 ###############################
 
-def attacker_select(event, attacker_listbox, attacker_list, weapon_listbox):
+def attacker_select(event, G_SELECTED_ATTACKER, attacker_listbox, attacker_list, weapon_listbox):
     if attacker_listbox.curselection() != ():
-        attacker_index = attacker_listbox.curselection()[0]
+        G_SELECTED_ATTACKER.set(attacker_listbox.curselection()[0])
 
         box_index = 0
         weapon_listbox.delete(0, tk.END)
-        for weapon in attacker_list[attacker_index].weapons:
+        for weapon in attacker_list[G_SELECTED_ATTACKER.get()].weapons:
             weapon_listbox.insert(box_index, weapon.name)
             box_index += 1
 # End attacker_select()
 
-def weapon_select(event, weapon_listbox, attacker_list, weapon_stats_listbox):
+def weapon_select(event, G_SELECTED_ATTACKER, G_SELECTED_WEAPON, 
+                  weapon_listbox, attacker_list, weapon_stats_listbox):
     if weapon_listbox.curselection() != ():
-        weapon_index = weapon_listbox.curselection()[0]
+        G_SELECTED_WEAPON = weapon_listbox.curselection()[0]
+        selected_weapon_name = weapon_listbox.get(G_SELECTED_WEAPON)
 
-        # Determine which attacker has the selected weapon
-        # Known issue: if multiple weapons share the same name, this can't determine which
-        # of the multiple weapons is the 'correct' one
-        index = 0
-        for attacker in attacker_list:
-            for weapon in attacker.weapons:
-                if weapon_listbox.get(weapon_index) == weapon.name:
-                    weapon_stats_listbox.delete(0, tk.END)
-                    weapon_stats_listbox.insert('0', f'{weapon.count}x{weapon.attacks} attacks')
-                    weapon_stats_listbox.insert('1', f'Hitting on {weapon.skill}+')
-                    weapon_stats_listbox.insert('2', f'S{weapon.strength} AP{weapon.AP} {weapon.damage}D')
-                    weapon_stats_listbox.insert('3', f'Abilities:')
-                    sub_index = 4
-                    for ability in weapon.abilities:
-                        weapon_stats_listbox.insert(f'{sub_index}', f'{ability}')
-                        sub_index += 1
-            index += 1
+        attacker = attacker_list[G_SELECTED_ATTACKER]
+        for weapon in attacker.weapons:
+            if weapon.name == selected_weapon_name:
+                weapon_stats_listbox.delete(0, tk.END)
+                weapon_stats_listbox.insert('0', f'{weapon.count}x{weapon.attacks} attacks')
+                weapon_stats_listbox.insert('1', f'Hitting on {weapon.skill}+')
+                weapon_stats_listbox.insert('2', f'S{weapon.strength} AP{weapon.AP} {weapon.damage}D')
+                weapon_stats_listbox.insert('3', f'Abilities:')
+                sub_index = 4
+                for ability in weapon.abilities:
+                    weapon_stats_listbox.insert(f'{sub_index}', f'{ability}')
+                    sub_index += 1
 # End attacker_select()
 
 
-def defender_select(event, defender_listbox, defender_list, defender_stats_listbox):
+def defender_select(event, G_SELECTED_DEFENDER, defender_listbox, defender_list, defender_stats_listbox):
     if defender_listbox.curselection() != ():
-        defender_index = defender_listbox.curselection()[0]
+        G_SELECTED_DEFENDER = defender_listbox.curselection()[0]
 
         defender_stats_listbox.delete(0, tk.END)
-        defender_stats_listbox.insert('0', f'Model Count: {defender_list[defender_index].model_count}')
-        defender_stats_listbox.insert('1', f'T{defender_list[defender_index].toughness} {defender_list[defender_index].wounds}W')
-        defender_stats_listbox.insert('2', f'{defender_list[defender_index].armor}+/{defender_list[defender_index].invul}++')
+        defender_stats_listbox.insert('0', f'Model Count: {defender_list[G_SELECTED_DEFENDER].model_count}')
+        defender_stats_listbox.insert('1', f'T{defender_list[G_SELECTED_DEFENDER].toughness} {defender_list[G_SELECTED_DEFENDER].wounds}W')
+        defender_stats_listbox.insert('2', f'{defender_list[G_SELECTED_DEFENDER].armor}+/{defender_list[G_SELECTED_DEFENDER].invul}++')
         defender_stats_listbox.insert('3', f'Keywords:')
         sub_index = 4
-        for keyword in defender_list[defender_index].keywords:
+        for keyword in defender_list[G_SELECTED_DEFENDER].keywords:
             defender_stats_listbox.insert(f'{sub_index}', f'{keyword}')
             sub_index += 1
 
@@ -311,11 +354,11 @@ def thread_run_all(results_text, attacker_list, defender_list,
 # End thread_run_all()
 
 
-def thread_run_attacker(results_text, attacker_list, defender_list,
+def thread_run_attacker(results_text, attacker_list, defender_list, weapon_listbox, G_SELECTED_ATTACKER,
                         half_range, indirect, stationary, charged, cover):
     """ Creates the sub-thread to run the selected attacker against all defenders """
 
-    t2 = threading.Thread(target = run_attacker, args = (results_text, attacker_list, defender_list,
+    t2 = threading.Thread(target = run_attacker, args = (results_text, attacker_list, defender_list, weapon_listbox, G_SELECTED_ATTACKER,
                                                          half_range, indirect, stationary, charged, cover))
     t2.start()
 # End thread_run_attacker()
@@ -346,6 +389,9 @@ def main():
     G_COVER = tk.BooleanVar(root)
     G_STATIONARY = tk.BooleanVar(root)
     G_CHARGED = tk.BooleanVar(root)
+    G_SELECTED_ATTACKER = tk.IntVar(root)
+    G_SELECTED_WEAPON = tk.IntVar(root)
+    G_SELECTED_DEFENDER = tk.IntVar(root)
     default_font = ('Cascadia Code', '14')
     title_font = ('Cascadia Code', '18', 'bold')
     default_padding = 20
@@ -366,6 +412,7 @@ def main():
     attacker_listbox = tk.Listbox(attacker_frame, height = 10, font = default_font)
     weapon_listbox = tk.Listbox(attacker_frame, height = 10, font = default_font)
     weapon_stats_listbox = tk.Listbox(attacker_frame, height = 10, font = default_font)
+    # Populate Attacker listbox
     index = 0
     for attacker in attacker_list:
         attacker_listbox.insert(f'{index}', attacker.name)
@@ -378,6 +425,7 @@ def main():
     defender_stats_label = ttk.Label(defender_frame, text = 'Defender Stats', style = 'default.TLabel')
     defender_listbox = tk.Listbox(defender_frame, height = 10, font = default_font)
     defender_stats_listbox = tk.Listbox(defender_frame, height = 10, font = default_font)
+    # Populate Defender listbox
     index = 0
     for defender in defender_list:
         defender_listbox.insert(f'{index}', defender.name)
@@ -412,7 +460,7 @@ def main():
                                style = 'default.TButton')
     calculate_attacker = ttk.Button(calculate_frame,
                                     text = 'Calculate Attacker',
-                                    command = lambda: thread_run_attacker(results_text, attacker_list, defender_list,
+                                    command = lambda: thread_run_attacker(results_text, attacker_list, defender_list, weapon_listbox, G_SELECTED_ATTACKER.get(),
                                                       G_HALF_RANGE.get(), G_INDIRECT.get(), G_STATIONARY.get(), G_CHARGED.get(), G_COVER.get()),
                                     style = 'default.TButton')
     calculate_weapon = ttk.Button(calculate_frame,
@@ -481,10 +529,9 @@ def main():
 
 
     # Event handling
-    selected_attacker = None
-    attacker_listbox.bind('<<ListboxSelect>>', lambda event: attacker_select(event, attacker_listbox, attacker_list, weapon_listbox))
-    weapon_listbox.bind('<<ListboxSelect>>', lambda event: weapon_select(event, weapon_listbox, attacker_list, weapon_stats_listbox))
-    defender_listbox.bind('<<ListboxSelect>>', lambda event: defender_select(event, defender_listbox, defender_list, defender_stats_listbox))
+    attacker_listbox.bind('<<ListboxSelect>>', lambda event: attacker_select(event, G_SELECTED_ATTACKER, attacker_listbox, attacker_list, weapon_listbox))
+    weapon_listbox.bind('<<ListboxSelect>>', lambda event: weapon_select(event, G_SELECTED_ATTACKER.get(), G_SELECTED_WEAPON, weapon_listbox, attacker_list, weapon_stats_listbox))
+    defender_listbox.bind('<<ListboxSelect>>', lambda event: defender_select(event, G_SELECTED_DEFENDER, defender_listbox, defender_list, defender_stats_listbox))
     root.mainloop()
 
 if __name__ == '__main__':
