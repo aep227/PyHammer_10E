@@ -7,10 +7,13 @@ import Unit
 
 def initialize():
     """ 
-    Set up Unit and Weapon instances
+    Set up initial Unit and Weapon instances
      
-    returns - list of units
+    returns - list of attacker units, list of defender units
     """
+
+    # Select between generic defenders for testing weapons
+    # or generic weapons for testing durability
 
     # Create weapons first
     bolterX5 = Weapon.Weapon(name = '5x Bolter',
@@ -76,7 +79,7 @@ def initialize():
                     damage = 1,
                     abilities = {'TORRENT', 'IGNORES COVER'})
     
-    paragon_MM = Weapon.Weapon(name = '3x Multimeltas',
+    paragon_MM = Weapon.Weapon(name = '3x Multimeltas vs Mon/Veh',
                     count = 3,
                     attacks = 2,
                     skill = 2,
@@ -85,7 +88,7 @@ def initialize():
                     damage = 'D6',
                     abilities = {'MELTA 2', 'LANCE'})
     
-    paragon_krak = Weapon.Weapon(name = '3x Krak Grenades',
+    paragon_krak = Weapon.Weapon(name = '3x Krak Grenades vs Mon/Veh',
                     count = 3,
                     attacks = 1,
                     skill = 2,
@@ -93,6 +96,42 @@ def initialize():
                     AP = -2,
                     damage = 'D3',
                     abilities = {'TWIN-LINKED', 'LANCE'})
+    
+    paragon_sword = Weapon.Weapon(name = '3x Paragon Swords',
+                    count = 3,
+                    attacks = 4,
+                    skill = 3,
+                    strength = 8,
+                    AP = -2,
+                    damage = 2,
+                    abilities = {})
+    
+    paragon_sword_vs_big = Weapon.Weapon(name = '3x Paragon Swords vs Mon/Veh',
+                    count = 3,
+                    attacks = 4,
+                    skill = 2,
+                    strength = 8,
+                    AP = -2,
+                    damage = 2,
+                    abilities = {'LANCE'})
+    
+    paragon_mace = Weapon.Weapon(name = '3x Paragon Maces',
+                    count = 3,
+                    attacks = 3,
+                    skill = 3,
+                    strength = 12,
+                    AP = -1,
+                    damage = 3,
+                    abilities = {})
+    
+    paragon_mace_vs_big = Weapon.Weapon(name = '3x Paragon Maces vs Mon/Veh',
+                    count = 3,
+                    attacks = 3,
+                    skill = 2,
+                    strength = 12,
+                    AP = -1,
+                    damage = 3,
+                    abilities = {'LANCE'})
     
     exorcist_missiles = Weapon.Weapon(name = 'Exorcist Missiles',
                     count = 1,
@@ -183,7 +222,7 @@ def initialize():
                armor = 2,
                invul = 4,
                keywords = {'VEHICLE', 'WALKER'},
-               weapons =  {paragon_MM, paragon_krak})
+               weapons =  {paragon_MM, paragon_krak, paragon_sword, paragon_sword_vs_big, paragon_mace, paragon_mace_vs_big})
     
     exorcist = Unit.Unit(name = 'Exorcist',
                model_count = 1,

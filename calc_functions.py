@@ -46,7 +46,13 @@ Available weapon keywords:
 - Heavy
 - Devastating Wounds
 - Sustained Hits
-- Anti-Keyword X+ (Infantry, Monster, Vehicle, Titanic)
+- WIP: Anti-Keyword X+ (Infantry, Monster, Vehicle, Titanic)
+- REROLL ONES HITS
+- REROLL ALL HITS
+- WIP: +1 TO HIT
+- WIP: -1 TO HIT
+- WIP: +1 TO WOUND
+- WIP: -1 TO WOUND
 
 Available unit keywords:
 - Feel No Pain
@@ -65,7 +71,8 @@ def calc_hits_avg(weapon, defender, half_range, indirect, stationary):
     hits - the average hits on the defender
     lethals - the average number of lethal hits on the defender
     """
-
+    sustained = 0
+    lethals = 0
     # Convert random attacks to average
     if weapon.attacks in RANDOM_VALUE_AVGS:
         attacks = RANDOM_VALUE_AVGS[weapon.attacks]
@@ -90,16 +97,12 @@ def calc_hits_avg(weapon, defender, half_range, indirect, stationary):
 
         if 'LETHAL HITS' in ability:
             lethals = attacks * P6
-        else:
-            lethals = 0
         
         if 'SUSTAINED HITS' in ability:
             value = ability[-2:].strip()
             if value == 'D3':
                 value = 2
             sustained = (attacks * P6) * int(value)
-        else:
-            sustained = 0
     
     # Determine target number
     skill_mod = 0

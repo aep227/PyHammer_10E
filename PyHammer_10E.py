@@ -7,7 +7,7 @@
 
 import data_manage as data_man
 import calc_functions as calc
-import calculation_run_func as calc_run
+import run_functions as run_func
 import tkinter as tk
 import tkinter.ttk as ttk
 import subprocess
@@ -72,7 +72,7 @@ def thread_run_all(results_text, attacker_list, defender_list,
                    half_range, indirect, stationary, charged, cover):
     """ Creates the sub-thread to run all attackers against all defenders """
 
-    t1 = threading.Thread(target = calc_run.run_all, args = (results_text, attacker_list, defender_list,
+    t1 = threading.Thread(target = run_func.run_all, args = (results_text, attacker_list, defender_list,
                                                     half_range, indirect, stationary, charged, cover))
     t1.start()
 # End thread_run_all()
@@ -82,7 +82,7 @@ def thread_run_attacker(results_text, attacker_list, defender_list, G_SELECTED_A
                         half_range, indirect, stationary, charged, cover):
     """ Creates the sub-thread to run the selected attacker against all defenders """
 
-    t2 = threading.Thread(target = calc_run.run_attacker, args = (results_text, attacker_list, defender_list, G_SELECTED_ATTACKER,
+    t2 = threading.Thread(target = run_func.run_attacker, args = (results_text, attacker_list, defender_list, G_SELECTED_ATTACKER,
                                                          half_range, indirect, stationary, charged, cover))
     t2.start()
 # End thread_run_attacker()
@@ -92,7 +92,7 @@ def thread_run_weapon(results_text, attacker_list, defender_list, weapon_listbox
                       half_range, indirect, stationary, charged, cover):
     """ Creates the sub-thread to run the selected weapon against all defenders """
 
-    t3 = threading.Thread(target = calc_run.run_weapon, args = (results_text, attacker_list, defender_list, weapon_listbox,
+    t3 = threading.Thread(target = run_func.run_weapon, args = (results_text, attacker_list, defender_list, weapon_listbox,
                                                        G_SELECTED_ATTACKER, G_SELECTED_WEAPON,
                                                        half_range, indirect, stationary, charged, cover))
     t3.start()
