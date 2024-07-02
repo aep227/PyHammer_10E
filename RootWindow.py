@@ -1,6 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-import AddAttackerWindow as AddAttackerWindow
+import AddAttackerWindow as AddAttackerWindowImport
 import data_manage as data_man
 import run_functions as run_func
 import threading
@@ -64,9 +64,12 @@ class RootWindow(tk.Tk):
         # Function buttons
         self.db_function_frame = ttk.Frame(self, style = 'default.TFrame')
         self.add_attacker_unit_button = ttk.Button(self.db_function_frame, text = 'Add Attacker Unit', style = 'default.TButton',
-                                            command = lambda: AddAttackerWindow.AddAttackerWindow())
+                                                   command = lambda: AddAttackerWindowImport.AddAttackerWindow(self.attacker_list, self.attacker_listbox))
         self.add_attacker_weapon_button = ttk.Button(self.db_function_frame, text = 'Add Attacker Weapon', style = 'default.TButton')
-        self.remove_attacker_unit_button = ttk.Button(self.db_function_frame, text = 'Remove Attacker Unit', style = 'default.TButton')
+        self.remove_attacker_unit_button = ttk.Button(self.db_function_frame, text = 'Remove Attacker Unit', style = 'default.TButton',
+                                                      command = lambda: data_man.remove_attacker_from_list(self.attacker_list, self.attacker_listbox,
+                                                                                                           self.weapon_listbox, self.weapon_stats_listbox,
+                                                                                                           self.G_SELECTED_ATTACKER.get()))
         self.remove_attacker_weapon_button = ttk.Button(self.db_function_frame, text = 'Remove Attacker Weapon', style = 'default.TButton')
         self.add_defender_unit_button = ttk.Button(self.db_function_frame, text = 'Add Defender Unit', style = 'default.TButton')
         self.remove_defender_unit_button = ttk.Button(self.db_function_frame, text = 'Remove Defender Unit', style = 'default.TButton')

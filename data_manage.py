@@ -314,19 +314,34 @@ def initialize():
 # End initialize()
 
 
-def create_unit():
+def update_attacker_listbox(attacker_list, attacker_listbox):
+    attacker_listbox.delete('0', 'end')
+    index = 0
+    for attacker in attacker_list:
+        attacker_listbox.insert(f'{index}', attacker.name)
+        index += 1
+# End update_attacker_listbox()
+
+def add_attacker_to_list(attacker_list, attacker_listbox, name, model_count,toughness,
+                         wounds, armor, invul, abilities, keywords, weapons):
+    attacker = Unit.Unit(name, model_count, toughness, wounds, armor, invul, abilities, keywords, weapons)
+
+    attacker_list.append(attacker)
+    update_attacker_listbox(attacker_list, attacker_listbox)
+# End add_attacker()
+
+
+def remove_attacker_from_list(attacker_list, attacker_listbox, weapon_listbox, weapon_stats_listbox, selected_attacker):
+    del attacker_list[selected_attacker]
+    weapon_listbox.delete('0', 'end')
+    weapon_stats_listbox.delete('0', 'end')
+    update_attacker_listbox(attacker_list, attacker_listbox)
+# End remove_attacker_from_list()
+
+
+def add_weapon():
     pass
-# End create_unit()
-
-
-def remove_unit():
-    pass
-# End remove_unit()
-
-
-def create_weapon():
-    pass
-# End create_weapon()
+# End cadd_weapon()
 
 
 def remove_weapon():
@@ -334,9 +349,9 @@ def remove_weapon():
 # End remove_weapon()
 
 
-def create_defender():
+def add_defender():
     pass
-# End create_defender()
+# End add_defender()
 
 
 def remove_defender():
