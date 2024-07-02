@@ -8,6 +8,7 @@
 import data_manage as data_man
 import calc_functions as calc
 import run_functions as run_func
+import AddAttackerWindow as AddAttackerWindow
 import tkinter as tk
 import tkinter.ttk as ttk
 import subprocess
@@ -98,6 +99,21 @@ def thread_run_weapon(results_text, attacker_list, defender_list, weapon_listbox
     t3.start()
 # End thread_run_weapon()
 
+def populate_attacker_listbox(attacker_list, attacker_listbox):
+    index = 0
+    for attacker in attacker_list:
+        attacker_listbox.insert(f'{index}', attacker.name)
+        index += 1
+# End populate_attacker_listbox()
+
+
+def populate_defender_listbox(defender_list, defender_listbox):
+    index = 0
+    for defender in defender_list:
+        defender_listbox.insert(f'{index}', defender.name)
+        index += 1
+# End populate_attacker_listbox()
+
 
 def main():
     attacker_list, defender_list = data_man.initialize()
@@ -109,6 +125,7 @@ def main():
     #############################
 
     root = tk.Tk()
+    root.title('PyHammer 10E')
     G_HALF_RANGE = tk.BooleanVar(root)
     G_INDIRECT = tk.BooleanVar(root)
     G_COVER = tk.BooleanVar(root)
@@ -137,12 +154,7 @@ def main():
     attacker_listbox = tk.Listbox(attacker_frame, height = 10, font = default_font)
     weapon_listbox = tk.Listbox(attacker_frame, height = 10, font = default_font)
     weapon_stats_listbox = tk.Listbox(attacker_frame, height = 10, font = default_font)
-    # Populate Attacker listbox
-    index = 0
-    for attacker in attacker_list:
-        attacker_listbox.insert(f'{index}', attacker.name)
-        index += 1
-    index = 0
+    
 
     # Defender frame
     defender_frame = ttk.Frame(root, style = 'default.TFrame')
@@ -150,12 +162,7 @@ def main():
     defender_stats_label = ttk.Label(defender_frame, text = 'Defender Stats', style = 'default.TLabel')
     defender_listbox = tk.Listbox(defender_frame, height = 10, font = default_font)
     defender_stats_listbox = tk.Listbox(defender_frame, height = 10, font = default_font)
-    # Populate Defender listbox
-    index = 0
-    for defender in defender_list:
-        defender_listbox.insert(f'{index}', defender.name)
-        index += 1
-    index = 0
+
 
     # Results frame
     results_frame = ttk.Frame(root, style = 'default.TFrame')
@@ -169,7 +176,8 @@ def main():
 
     # Function buttons
     db_function_frame = ttk.Frame(root, style = 'default.TFrame')
-    add_attacker_unit_button = ttk.Button(db_function_frame, text = 'Add Attacker Unit', style = 'default.TButton')
+    add_attacker_unit_button = ttk.Button(db_function_frame, text = 'Add Attacker Unit', style = 'default.TButton',
+                                          command = lambda: AddAttackerWindow.AddAttackerWindow())
     add_attacker_weapon_button = ttk.Button(db_function_frame, text = 'Add Attacker Weapon', style = 'default.TButton')
     remove_attacker_unit_button = ttk.Button(db_function_frame, text = 'Remove Attacker Unit', style = 'default.TButton')
     remove_attacker_weapon_button = ttk.Button(db_function_frame, text = 'Remove Attacker Weapon', style = 'default.TButton')
@@ -254,6 +262,10 @@ def main():
     db_function_frame.grid( row = 2, column = 0, rowspan = 2)
     settings_frame.grid(    row = 2, column = 2)
     calculate_frame.grid(   row = 3, column = 2)
+
+    # Populate listboxes
+    populate_attacker_listbox(attacker_list, attacker_listbox)
+    populate_defender_listbox(defender_list, defender_listbox)
 
 
     # Event handling
