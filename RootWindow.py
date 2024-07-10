@@ -155,9 +155,14 @@ class RootWindow(tk.Tk):
         self.calculate_frame.grid(   row = 3, column = 2)
 
         # Event handling
-        self.attacker_listbox.bind('<<ListboxSelect>>', lambda event: self.attacker_select(event, self.G_SELECTED_ATTACKER, self.attacker_listbox, self.attacker_list, self.weapon_listbox))
-        self.weapon_listbox.bind('<<ListboxSelect>>', lambda event: self.weapon_select(event, self.G_SELECTED_ATTACKER.get(), self.G_SELECTED_WEAPON, self.weapon_listbox, self.attacker_list, self.weapon_stats_listbox))
-        self.defender_listbox.bind('<<ListboxSelect>>', lambda event: self.defender_select(event, self.G_SELECTED_DEFENDER, self.defender_listbox, self.defender_list, self.defender_stats_listbox))
+        self.attacker_listbox.bind('<<ListboxSelect>>', lambda event: self.attacker_select(event, self.G_SELECTED_ATTACKER, self.attacker_listbox,
+                                                                                           self.attacker_list, self.weapon_listbox, self.weapon_stats_listbox))
+        
+        self.weapon_listbox.bind('<<ListboxSelect>>', lambda event: self.weapon_select(event, self.G_SELECTED_ATTACKER.get(), self.G_SELECTED_WEAPON,
+                                                                                       self.weapon_listbox, self.attacker_list, self.weapon_stats_listbox))
+        
+        self.defender_listbox.bind('<<ListboxSelect>>', lambda event: self.defender_select(event, self.G_SELECTED_DEFENDER, self.defender_listbox,
+                                                                                           self.defender_list, self.defender_stats_listbox))
 
         # Populate listboxes with initial values
         self.populate_attacker_listbox(self.attacker_list, self.attacker_listbox)
@@ -206,7 +211,7 @@ class RootWindow(tk.Tk):
     #        GUI Functions        #
     ###############################
 
-    def attacker_select(self, event, G_SELECTED_ATTACKER, attacker_listbox, attacker_list, weapon_listbox):
+    def attacker_select(self, event, G_SELECTED_ATTACKER, attacker_listbox, attacker_list, weapon_listbox, weapon_stats_listbox):
         if attacker_listbox.curselection() != ():
             G_SELECTED_ATTACKER.set(attacker_listbox.curselection()[0])
 
@@ -215,6 +220,8 @@ class RootWindow(tk.Tk):
             for weapon in attacker_list[G_SELECTED_ATTACKER.get()].weapons:
                 weapon_listbox.insert(box_index, weapon.name)
                 box_index += 1
+
+            weapon_stats_listbox.delete(0, tk.END)
     # End attacker_select()
 
 
