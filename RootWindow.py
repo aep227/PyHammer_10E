@@ -18,6 +18,7 @@ class RootWindow(tk.Tk):
         self.G_SELECTED_ATTACKER = tk.IntVar(self)
         self.G_SELECTED_WEAPON = tk.IntVar(self)
         self.G_SELECTED_DEFENDER = tk.IntVar(self)
+        self.G_CALC_EFFICIENCY = tk.BooleanVar(self)
         self.std_font = ('Cascadia Code', '14')
         self.title_font = ('Cascadia Code', '18', 'bold')
         self.std_padding = 20
@@ -80,20 +81,21 @@ class RootWindow(tk.Tk):
         self.calculate_frame = ttk.Frame(self, style = 'default.TFrame')
         self.calculate_all = ttk.Button(self.calculate_frame, text = 'Calculate All',
                                 command = lambda: self.thread_run_all(self.results_text, self.attacker_list, self.defender_list,
-                                                                    self.G_HALF_RANGE.get(), self.G_INDIRECT.get(), self.G_STATIONARY.get(),
-                                                                    self.G_CHARGED.get(), self.G_COVER.get()),
+                                                                      self.G_HALF_RANGE.get(), self.G_INDIRECT.get(), self.G_STATIONARY.get(),
+                                                                      self.G_CHARGED.get(), self.G_COVER.get(), self.G_CALC_EFFICIENCY.get()),
                                 style = 'default.TButton')
         self.calculate_attacker = ttk.Button(self.calculate_frame,
                                         text = 'Calculate Attacker',
                                         command = lambda: self.thread_run_attacker(self.results_text, self.attacker_list, self.defender_list,
-                                                                            self.G_SELECTED_ATTACKER.get(), self.G_HALF_RANGE.get(),
-                                                                            self.G_INDIRECT.get(), self.G_STATIONARY.get(), self.G_CHARGED.get(), self.G_COVER.get()),
+                                                                                   self.G_SELECTED_ATTACKER.get(), self.G_HALF_RANGE.get(),
+                                                                                   self.G_INDIRECT.get(), self.G_STATIONARY.get(), self.G_CHARGED.get(),
+                                                                                   self.G_COVER.get(), self.G_CALC_EFFICIENCY.get()),
                                         style = 'default.TButton')
         self.calculate_weapon = ttk.Button(self.calculate_frame,
                                     text = 'Calculate Weapon',
                                     command = lambda: self.thread_run_weapon(self.results_text, self.attacker_list, self.defender_list, self.weapon_listbox, self.G_SELECTED_ATTACKER.get(),
-                                                                        self.G_SELECTED_WEAPON.get(), self.G_HALF_RANGE.get(), self.G_INDIRECT.get(), self.G_STATIONARY.get(),
-                                                                        self.G_CHARGED.get(), self.G_COVER.get()),
+                                                                             self.G_SELECTED_WEAPON.get(), self.G_HALF_RANGE.get(), self.G_INDIRECT.get(), self.G_STATIONARY.get(),
+                                                                             self.G_CHARGED.get(), self.G_COVER.get(), self.G_CALC_EFFICIENCY.get()),
                                     style = 'default.TButton')
 
 
@@ -104,6 +106,7 @@ class RootWindow(tk.Tk):
         self.stationary_check = ttk.Checkbutton(self.settings_frame, text = 'Attacker Stationary', variable = self.G_STATIONARY, style = 'default.TCheckbutton', offvalue = False, onvalue = True)
         self.charged_check = ttk.Checkbutton(self.settings_frame, text = 'Attacker Charged', variable = self.G_CHARGED, style = 'default.TCheckbutton', offvalue = False, onvalue = True)
         self.cover_check = ttk.Checkbutton(self.settings_frame, text = 'Defender in Cover', variable = self.G_COVER, style = 'default.TCheckbutton', offvalue = False, onvalue = True)
+        self.efficiency_check = ttk.Checkbutton(self.settings_frame, text = 'Calculate Efficiency', variable = self.G_CALC_EFFICIENCY, style = 'default.TCheckbutton', offvalue = False, onvalue = True)
 
 
         # Lay out attacker frame
@@ -126,6 +129,7 @@ class RootWindow(tk.Tk):
         self.stationary_check.grid(  row = 0, column = 1, padx = self.std_padding, sticky = 'w')
         self.charged_check.grid(     row = 1, column = 1, padx = self.std_padding, sticky = 'w')
         self.cover_check.grid(       row = 0, column = 2, padx = self.std_padding, sticky = 'w')
+        self.efficiency_check.grid(  row = 1, column = 2, padx = self.std_padding, sticky = 'w')
 
         # Lay out results frame
         self.results_label.grid(    row = 0, column = 0)
@@ -176,32 +180,32 @@ class RootWindow(tk.Tk):
     ###############################
 
     def thread_run_all(self, results_text, attacker_list, defender_list,
-                half_range, indirect, stationary, charged, cover):
+                half_range, indirect, stationary, charged, cover, calc_efficiency):
         """ Creates the sub-thread to run all attackers against all defenders """
 
         t1 = threading.Thread(target = run_func.run_all, args = (results_text, attacker_list, defender_list,
-                                                half_range, indirect, stationary, charged, cover))
+                                                half_range, indirect, stationary, charged, cover, calc_efficiency))
         t1.start()
     # End thread_run_all()
 
 
     def thread_run_attacker(self, results_text, attacker_list, defender_list, G_SELECTED_ATTACKER,
-                            half_range, indirect, stationary, charged, cover):
+                            half_range, indirect, stationary, charged, cover, calc_efficiency):
         """ Creates the sub-thread to run the selected attacker against all defenders """
 
         t2 = threading.Thread(target = run_func.run_attacker, args = (results_text, attacker_list, defender_list, G_SELECTED_ATTACKER,
-                                                            half_range, indirect, stationary, charged, cover))
+                                                            half_range, indirect, stationary, charged, cover, calc_efficiency))
         t2.start()
     # End thread_run_attacker()
 
 
     def thread_run_weapon(self, results_text, attacker_list, defender_list, weapon_listbox, G_SELECTED_ATTACKER, G_SELECTED_WEAPON,
-                        half_range, indirect, stationary, charged, cover):
+                        half_range, indirect, stationary, charged, cover, calc_efficiency):
         """ Creates the sub-thread to run the selected weapon against all defenders """
 
         t3 = threading.Thread(target = run_func.run_weapon, args = (results_text, attacker_list, defender_list, weapon_listbox,
                                                         G_SELECTED_ATTACKER, G_SELECTED_WEAPON,
-                                                        half_range, indirect, stationary, charged, cover))
+                                                        half_range, indirect, stationary, charged, cover, calc_efficiency))
         t3.start()
     # End thread_run_weapon()
 

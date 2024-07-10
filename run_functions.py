@@ -9,8 +9,10 @@ from prettytable import SINGLE_BORDER
 ###################################
 
 def run_all(results_text, attacker_list, defender_list,
-            half_range, indirect, stationary, charged, cover):
+            half_range, indirect, stationary, charged, cover,
+            calc_efficiency):
     results_dict = {}
+    # Calculate average models slain
     for attacker in attacker_list:
         if attacker not in results_dict:
             results_dict[attacker.name] = {}
@@ -38,10 +40,13 @@ def run_all(results_text, attacker_list, defender_list,
                 avg_slain = calc.calc_slain_avg(avg_unsaved, weapon, defender)
                 results_dict[attacker.name][weapon.name][defender.name]['Avg Slain'] = avg_slain
 
-    
     table = PrettyTable()
     table.set_style(SINGLE_BORDER)
-    header_row = ['Weapon']
+
+    if calc_efficiency:
+        header_row = ['Weapon Points/Kill']
+    else:
+        header_row = ['Weapon']
 
     for defender in defender_list:
         header_row.append(defender.name)
@@ -58,9 +63,28 @@ def run_all(results_text, attacker_list, defender_list,
 
         for weapon in results_dict[f'{attacker}']:
             row = [f'{weapon}']
-            for defender in results_dict[f'{attacker}'][f'{weapon}']:
-                row.append(results_dict[f'{attacker}'][f'{weapon}'][f'{defender}']['Avg Slain'])
+
+            if calc_efficiency:
+                for defender in results_dict[f'{attacker}'][f'{weapon}']:
+                    # Determine attacker object in list from attacker name
+                    for unit in attacker_list:
+                        if unit.name == attacker:
+                            attacker_obj = unit
+
+                    slain = results_dict[f'{attacker}'][f'{weapon}'][f'{defender}']['Avg Slain']
+
+                    if slain != 0:
+                        efficiency = attacker_obj.points / slain
+                    else:
+                        efficiency = 0
+                    efficiency = float('{0:.2f}'.format(efficiency))
+                    row.append(efficiency)
+            else:
+                for defender in results_dict[f'{attacker}'][f'{weapon}']:
+                    row.append(results_dict[f'{attacker}'][f'{weapon}'][f'{defender}']['Avg Slain'])
+                    
             table.add_row(row)
+
         
         # Blank row for next attacker
         if len(results_dict.keys()) > 1 and attacker_index != len(results_dict.keys()):
@@ -79,13 +103,18 @@ def run_all(results_text, attacker_list, defender_list,
 
 
 def run_attacker(results_text, attacker_list, defender_list, G_SELECTED_ATTACKER,
-                 half_range, indirect, stationary, charged, cover):
+                 half_range, indirect, stationary, charged, cover, calc_efficiency):
     attacker = attacker_list[G_SELECTED_ATTACKER]
     results_dict = {}
     results_dict[attacker.name] = {}
     table = PrettyTable()
     table.set_style(SINGLE_BORDER)
-    header_row = ['Weapon']
+    
+    if calc_efficiency:
+        header_row = ['Weapon Points/Kill']
+    else:
+        header_row = ['Weapon']
+
     for defender in defender_list:
         header_row.append(defender.name)
     table.field_names = header_row
@@ -120,8 +149,22 @@ def run_attacker(results_text, attacker_list, defender_list, G_SELECTED_ATTACKER
 
     for weapon in results_dict[f'{attacker.name}']:
         row = [f'{weapon}']
-        for defender in results_dict[f'{attacker.name}'][f'{weapon}']:
-            row.append(results_dict[f'{attacker.name}'][f'{weapon}'][f'{defender}']['Avg Slain'])
+
+        if calc_efficiency:
+            for defender in results_dict[f'{attacker.name}'][f'{weapon}']:
+
+                slain = results_dict[f'{attacker.name}'][f'{weapon}'][f'{defender}']['Avg Slain']
+
+                if slain != 0:
+                    efficiency = attacker.points / slain
+                else:
+                    efficiency = 0
+                efficiency = float('{0:.2f}'.format(efficiency))
+                row.append(efficiency)
+        else:
+            for defender in results_dict[f'{attacker.name}'][f'{weapon}']:
+                row.append(results_dict[f'{attacker.name}'][f'{weapon}'][f'{defender}']['Avg Slain'])
+
         table.add_row(row)
 
     results_text.config(state = 'normal')
@@ -133,7 +176,7 @@ def run_attacker(results_text, attacker_list, defender_list, G_SELECTED_ATTACKER
 
 
 def run_weapon(results_text, attacker_list, defender_list, weapon_listbox, G_SELECTED_ATTACKER, G_SELECTED_WEAPON,
-               half_range, indirect, stationary, charged, cover):
+               half_range, indirect, stationary, charged, cover, calc_efficiency):
     attacker = attacker_list[G_SELECTED_ATTACKER]
     for weapon_check in attacker.weapons:
         w_listbox_check = weapon_listbox.get(G_SELECTED_WEAPON)
@@ -144,7 +187,12 @@ def run_weapon(results_text, attacker_list, defender_list, weapon_listbox, G_SEL
     results_dict[attacker.name][weapon.name] = {}
     table = PrettyTable()
     table.set_style(SINGLE_BORDER)
-    header_row = ['Weapon']
+
+    if calc_efficiency:
+        header_row = ['Weapon Points/Kill']
+    else:
+        header_row = ['Weapon']
+
     for defender in defender_list:
         header_row.append(defender.name)
     table.field_names = header_row
@@ -175,8 +223,22 @@ def run_weapon(results_text, attacker_list, defender_list, weapon_listbox, G_SEL
 
     for weapon in results_dict[f'{attacker.name}']:
         row = [f'{weapon}']
-        for defender in results_dict[f'{attacker.name}'][f'{weapon}']:
-            row.append(results_dict[f'{attacker.name}'][f'{weapon}'][f'{defender}']['Avg Slain'])
+
+        if calc_efficiency:
+            for defender in results_dict[f'{attacker.name}'][f'{weapon}']:
+
+                slain = results_dict[f'{attacker.name}'][f'{weapon}'][f'{defender}']['Avg Slain']
+
+                if slain != 0:
+                    efficiency = attacker.points / slain
+                else:
+                    efficiency = 0
+                efficiency = float('{0:.2f}'.format(efficiency))
+                row.append(efficiency)
+        else:
+            for defender in results_dict[f'{attacker.name}'][f'{weapon}']:
+                row.append(results_dict[f'{attacker.name}'][f'{weapon}'][f'{defender}']['Avg Slain'])
+
         table.add_row(row)
 
     results_text.config(state = 'normal')

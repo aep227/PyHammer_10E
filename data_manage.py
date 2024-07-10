@@ -79,7 +79,7 @@ def initialize():
                     damage = 1,
                     abilities = {'TORRENT', 'IGNORES COVER'})
     
-    paragon_MM = Weapon.Weapon(name = '3x Multimeltas vs Mon/Veh',
+    paragon_MM = Weapon.Weapon(name = '3x MMs vs Mon/Veh',
                     count = 3,
                     attacks = 2,
                     skill = 2,
@@ -88,7 +88,7 @@ def initialize():
                     damage = 'D6',
                     abilities = {'MELTA 2', 'LANCE'})
     
-    paragon_krak = Weapon.Weapon(name = '3x Krak Grenades vs Mon/Veh',
+    paragon_krak = Weapon.Weapon(name = '3x Grenades vs Mon/Veh',
                     count = 3,
                     attacks = 1,
                     skill = 2,
@@ -97,7 +97,7 @@ def initialize():
                     damage = 'D3',
                     abilities = {'TWIN-LINKED', 'LANCE'})
     
-    paragon_sword = Weapon.Weapon(name = '3x Paragon Swords',
+    paragon_sword = Weapon.Weapon(name = '3x Swords',
                     count = 3,
                     attacks = 4,
                     skill = 3,
@@ -106,7 +106,7 @@ def initialize():
                     damage = 2,
                     abilities = {})
     
-    paragon_sword_vs_big = Weapon.Weapon(name = '3x Paragon Swords vs Mon/Veh',
+    paragon_sword_vs_big = Weapon.Weapon(name = '3x Swords vs Mon/Veh',
                     count = 3,
                     attacks = 4,
                     skill = 2,
@@ -115,7 +115,7 @@ def initialize():
                     damage = 2,
                     abilities = {'LANCE'})
     
-    paragon_mace = Weapon.Weapon(name = '3x Paragon Maces',
+    paragon_mace = Weapon.Weapon(name = '3x Maces',
                     count = 3,
                     attacks = 3,
                     skill = 3,
@@ -124,7 +124,7 @@ def initialize():
                     damage = 3,
                     abilities = {})
     
-    paragon_mace_vs_big = Weapon.Weapon(name = '3x Paragon Maces vs Mon/Veh',
+    paragon_mace_vs_big = Weapon.Weapon(name = '3x Maces vs Mon/Veh',
                     count = 3,
                     attacks = 3,
                     skill = 2,
