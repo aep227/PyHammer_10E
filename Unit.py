@@ -1,8 +1,10 @@
+import Weapon
+
 class Unit:
     """ Class defining a unit """
     def __init__(self, name=None, model_count=None, toughness=None,
                  wounds=None, armor=None, invul=None, abilities={},
-                 keywords={}, weapons={}):
+                 keywords={}, weapons={}, points=1):
         self.name = name
         self.model_count = model_count
         self.toughness = toughness
@@ -12,6 +14,7 @@ class Unit:
         self.abilities = abilities
         self.keywords = keywords
         self.weapons = weapons
+        self.points = points
 
     # Update functions
     def update_model_count(self, model_count):
@@ -113,7 +116,8 @@ class Unit:
             'Armor': f'{self.armor}',
             'Invul': f'{self.invul}',
             'Keywords': f'{self.keywords}',
-            'Weapons': f'{weapon_list}'
+            'Weapons': f'{weapon_list}',
+            'Points': f'{self.points}'
         }
 
         return report

@@ -323,8 +323,8 @@ def update_attacker_listbox(attacker_list, attacker_listbox):
 # End update_attacker_listbox()
 
 def add_attacker_to_list(attacker_list, attacker_listbox, name, model_count,toughness,
-                         wounds, armor, invul, abilities, keywords, weapons):
-    attacker = Unit.Unit(name, model_count, toughness, wounds, armor, invul, abilities, keywords, weapons)
+                         wounds, armor, invul, abilities, keywords):
+    attacker = Unit.Unit(name, model_count, toughness, wounds, armor, invul, abilities, keywords, weapons={})
 
     attacker_list.append(attacker)
     update_attacker_listbox(attacker_list, attacker_listbox)
