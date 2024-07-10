@@ -365,8 +365,11 @@ def add_weapon_to_attacker(attacker_list, weapon_listbox, selected_attacker, nam
 # End add_weapon_to_attacker()
 
 
-def remove_weapon():
-    pass
+def remove_weapon(attacker_list, weapon_listbox, selected_attacker, selected_weapon, weapon_stats_listbox):
+    weapon_to_remove = weapon_listbox.get(selected_weapon)
+    attacker_list[selected_attacker].remove_weapon(weapon_to_remove)
+    weapon_stats_listbox.delete('0', 'end')
+    update_weapon_listbox(attacker_list, weapon_listbox, selected_attacker)
 # End remove_weapon()
 
 

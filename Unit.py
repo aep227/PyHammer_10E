@@ -86,9 +86,11 @@ class Unit:
         else:
             print(f'Error: {weapon} is not a Weapon object')
 
-    def remove_weapon(self, weapon):
-        if weapon in self.weapons:
-            self.weapons.remove(weapon)
+    def remove_weapon(self, weapon_to_remove):
+        for weapon in self.weapons:
+            if weapon_to_remove == weapon.name:
+                self.weapons.remove(weapon)
+                break
         else:
             print(f'Alert: {self.name} is not equipped with {weapon}')
     

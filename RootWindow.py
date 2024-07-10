@@ -76,7 +76,10 @@ class RootWindow(tk.Tk):
                                                       command = lambda: data_man.remove_attacker_from_list(self.attacker_list, self.attacker_listbox,
                                                                                                            self.weapon_listbox, self.weapon_stats_listbox,
                                                                                                            self.G_SELECTED_ATTACKER.get()))
-        self.remove_attacker_weapon_button = ttk.Button(self.db_function_frame, text = 'Remove Attacker Weapon', style = 'default.TButton')
+        self.remove_attacker_weapon_button = ttk.Button(self.db_function_frame, text = 'Remove Attacker Weapon', style = 'default.TButton',
+                                                        command = lambda: data_man.remove_weapon(self.attacker_list, self.weapon_listbox, 
+                                                                                                 self.G_SELECTED_ATTACKER.get(), self.G_SELECTED_WEAPON.get(),
+                                                                                                 self.weapon_stats_listbox))
         self.add_defender_unit_button = ttk.Button(self.db_function_frame, text = 'Add Defender Unit', style = 'default.TButton')
         self.remove_defender_unit_button = ttk.Button(self.db_function_frame, text = 'Remove Defender Unit', style = 'default.TButton')
 
