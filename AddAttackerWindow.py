@@ -10,7 +10,7 @@ class AddAttackerWindow(tk.Toplevel):
         self.default_pad = 20
         self.default_font = ('Cascadia Code', '14')
 
-        win_x = root_x + 300
+        win_x = root_x + 298
         win_y = root_y + 50
         self.geometry(f'+{win_x}+{win_y}')
 

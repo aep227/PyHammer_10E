@@ -329,13 +329,23 @@ def update_attacker_listbox(attacker_list, attacker_listbox):
         index += 1
 # End update_attacker_listbox()
 
+
+def update_weapon_listbox(attacker_list, weapon_listbox, selected_attacker):
+    weapon_listbox.delete('0', 'end')
+    index = 0
+    for weapon in attacker_list[selected_attacker].weapons:
+        weapon_listbox.insert(f'{index}', weapon.name)
+        index += 1
+# End update_weapon_listbox()
+
+
 def add_attacker_to_list(attacker_list, attacker_listbox, name, model_count,toughness,
                          wounds, armor, invul, abilities, keywords):
     attacker = Unit.Unit(name, model_count, toughness, wounds, armor, invul, abilities, keywords, weapons={})
 
     attacker_list.append(attacker)
     update_attacker_listbox(attacker_list, attacker_listbox)
-# End add_attacker()
+# End add_attacker_to_list()
 
 
 def remove_attacker_from_list(attacker_list, attacker_listbox, weapon_listbox, weapon_stats_listbox, selected_attacker):
@@ -346,9 +356,13 @@ def remove_attacker_from_list(attacker_list, attacker_listbox, weapon_listbox, w
 # End remove_attacker_from_list()
 
 
-def add_weapon():
-    pass
-# End cadd_weapon()
+def add_weapon_to_attacker(attacker_list, weapon_listbox, selected_attacker, name,
+                           count, attacks, skill, strength, AP, damage, abilities):
+    new_weapon = Weapon.Weapon(name, int(count), attacks, int(skill), int(strength), int(AP), damage, abilities)
+    attacker_list[selected_attacker].add_weapon(new_weapon)
+
+    update_weapon_listbox(attacker_list, weapon_listbox, selected_attacker)
+# End add_weapon_to_attacker()
 
 
 def remove_weapon():

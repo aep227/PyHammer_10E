@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import AddAttackerWindow as AddAttackerWindowImport
+import AddWeaponWindow as AddWeaponWindowImport
 import data_manage as data_man
 import run_functions as run_func
 import threading
@@ -67,7 +68,10 @@ class RootWindow(tk.Tk):
         self.add_attacker_unit_button = ttk.Button(self.db_function_frame, text = 'Add Attacker Unit', style = 'default.TButton',
                                                    command = lambda: AddAttackerWindowImport.AddAttackerWindow(self.attacker_list, self.attacker_listbox,
                                                                                                                self.get_location_x(), self.get_location_y()))
-        self.add_attacker_weapon_button = ttk.Button(self.db_function_frame, text = 'Add Attacker Weapon', style = 'default.TButton')
+        self.add_attacker_weapon_button = ttk.Button(self.db_function_frame, text = 'Add Attacker Weapon', style = 'default.TButton',
+                                                     command = lambda: AddWeaponWindowImport.AddWeaponWindow(self.attacker_list, self.weapon_listbox,
+                                                                                                               self.get_location_x(), self.get_location_y(),
+                                                                                                               self.G_SELECTED_ATTACKER.get()))
         self.remove_attacker_unit_button = ttk.Button(self.db_function_frame, text = 'Remove Attacker Unit', style = 'default.TButton',
                                                       command = lambda: data_man.remove_attacker_from_list(self.attacker_list, self.attacker_listbox,
                                                                                                            self.weapon_listbox, self.weapon_stats_listbox,

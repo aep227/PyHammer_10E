@@ -77,7 +77,7 @@ def calc_hits_avg(weapon, defender, half_range, indirect, stationary):
     if weapon.attacks in RANDOM_VALUE_AVGS:
         attacks = RANDOM_VALUE_AVGS[weapon.attacks]
     else:
-        attacks = weapon.attacks
+        attacks = int(weapon.attacks)
 
     # Multiple attacks by number of weapons
     attacks *= weapon.count
@@ -341,7 +341,7 @@ def calc_slain_avg(unsaved, weapon, defender):
     if weapon.damage in RANDOM_VALUE_AVGS:
         damage = RANDOM_VALUE_AVGS[weapon.damage]
     else:
-        damage = weapon.damage
+        damage = int(weapon.damage)
 
     unsaved_to_kill = math.ceil(defender.wounds / damage)
     slain = unsaved / unsaved_to_kill

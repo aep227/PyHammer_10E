@@ -81,7 +81,7 @@ class Unit:
 
     # Weapon add/remove/clear
     def add_weapon(self, weapon):
-        if isinstance(weapon, Weapon):
+        if isinstance(weapon, Weapon.Weapon):
             self.weapons.add(weapon)
         else:
             print(f'Error: {weapon} is not a Weapon object')
