@@ -64,7 +64,8 @@ class RootWindow(tk.Tk):
         # Function buttons
         self.db_function_frame = ttk.Frame(self, style = 'default.TFrame')
         self.add_attacker_unit_button = ttk.Button(self.db_function_frame, text = 'Add Attacker Unit', style = 'default.TButton',
-                                                   command = lambda: AddAttackerWindowImport.AddAttackerWindow(self.attacker_list, self.attacker_listbox))
+                                                   command = lambda: AddAttackerWindowImport.AddAttackerWindow(self.attacker_list, self.attacker_listbox,
+                                                                                                               self.get_location_x(), self.get_location_y()))
         self.add_attacker_weapon_button = ttk.Button(self.db_function_frame, text = 'Add Attacker Weapon', style = 'default.TButton')
         self.remove_attacker_unit_button = ttk.Button(self.db_function_frame, text = 'Remove Attacker Unit', style = 'default.TButton',
                                                       command = lambda: data_man.remove_attacker_from_list(self.attacker_list, self.attacker_listbox,
@@ -268,5 +269,14 @@ class RootWindow(tk.Tk):
             defender_listbox.insert(f'{index}', defender.name)
             index += 1
     # End populate_attacker_listbox()
+
+
+    def get_location_x(self):
+        return self.winfo_rootx()
+    
+
+    def get_location_y(self):
+        return self.winfo_rooty()
+
 
 # End RootWindow

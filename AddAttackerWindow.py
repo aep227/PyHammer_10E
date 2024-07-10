@@ -4,11 +4,15 @@ import data_manage as data_man
 
 class AddAttackerWindow(tk.Toplevel):
 
-    def __init__(self, attacker_list, attacker_listbox):
+    def __init__(self, attacker_list, attacker_listbox, root_x, root_y):
         tk.Toplevel.__init__(self)
         self.title('Add Attacker')
         self.default_pad = 20
         self.default_font = ('Cascadia Code', '14')
+
+        win_x = root_x + 300
+        win_y = root_y + 50
+        self.geometry(f'+{win_x}+{win_y}')
 
         self.name_label = ttk.Label(        self, text = 'Attacker Name', style = 'default.TLabel')
         self.name_entry = ttk.Entry(        self, width = 10, font = self.default_font, justify = 'center')
@@ -26,8 +30,6 @@ class AddAttackerWindow(tk.Toplevel):
         self.abilities_entry = ttk.Entry(   self, width = 10, font = self.default_font, justify = 'center')
         self.keywords_label = ttk.Label(    self, text = 'Keywords', style = 'default.TLabel')
         self.keywords_entry = ttk.Entry(    self, width = 10, font = self.default_font, justify = 'center')
-        self.weapons_label = ttk.Label(     self, text = 'Weapons', style = 'default.TLabel')
-        self.weapons_entry = ttk.Entry(     self, width = 10, font = self.default_font, justify = 'center')
         self.add_button = ttk.Button(       self, text = 'Add Attacker', style = 'default.TButton',
                                      command = lambda: data_man.add_attacker_to_list(attacker_list, attacker_listbox,
                                                                                     self.name_entry.get(),
@@ -37,8 +39,7 @@ class AddAttackerWindow(tk.Toplevel):
                                                                                     self.armor_entry.get(),
                                                                                     self.invul_entry.get(),
                                                                                     self.abilities_entry.get(),
-                                                                                    self.keywords_entry.get(),
-                                                                                    self.weapons_entry.get()))
+                                                                                    self.keywords_entry.get()))
         self.exit_button = ttk.Button(    self, text = 'Exit', style = 'default.TButton', command = self.destroy)
 
         # Layout Window
@@ -58,8 +59,6 @@ class AddAttackerWindow(tk.Toplevel):
         self.abilities_entry.grid(   row = 6, column = 1, padx = self.default_pad, pady = self.default_pad)
         self.keywords_label.grid(    row = 7, column = 0, padx = self.default_pad, sticky = 'w')
         self.keywords_entry.grid(    row = 7, column = 1, padx = self.default_pad, pady = self.default_pad)
-        self.weapons_label.grid(     row = 8, column = 0, padx = self.default_pad, sticky = 'w')
-        self.weapons_entry.grid(     row = 8, column = 1, padx = self.default_pad, pady = self.default_pad)
         self.add_button.grid(        row = 9, column = 0, padx = self.default_pad, sticky = 'w')
         self.exit_button.grid(     row = 9, column = 1, padx = self.default_pad, pady = self.default_pad)
 
