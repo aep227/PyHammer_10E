@@ -204,7 +204,8 @@ def initialize():
                armor = 3,
                invul = 6,
                keywords = {'INFANTRY'},
-               weapons =  {bolterX5, storm_bolterX4, flamerX4, meltagunX4})
+               weapons =  {bolterX5, storm_bolterX4, flamerX4, meltagunX4},
+               points = 115)
     
     rets = Unit.Unit(name = '5x Rets',
                model_count = 5,
@@ -213,7 +214,8 @@ def initialize():
                armor = 3,
                invul = 6,
                keywords = {'INFANTRY'},
-               weapons =  {heavy_bolterX4, multi_meltaX4, heavy_flamerX4})
+               weapons =  {heavy_bolterX4, multi_meltaX4, heavy_flamerX4},
+               points = 125)
     
     paragons = Unit.Unit(name = '3x Paragons',
                model_count = 3,
@@ -222,7 +224,8 @@ def initialize():
                armor = 2,
                invul = 4,
                keywords = {'VEHICLE', 'WALKER'},
-               weapons =  {paragon_MM, paragon_krak, paragon_sword, paragon_sword_vs_big, paragon_mace, paragon_mace_vs_big})
+               weapons =  {paragon_MM, paragon_krak, paragon_sword, paragon_sword_vs_big, paragon_mace, paragon_mace_vs_big},
+               points = 210)
     
     exorcist = Unit.Unit(name = 'Exorcist',
                model_count = 1,
@@ -231,7 +234,8 @@ def initialize():
                armor = 3,
                invul = 6,
                keywords = {'VEHICLE'},
-               weapons =  {exorcist_missiles})
+               weapons =  {exorcist_missiles},
+               points = 190)
     
     sacsX10 = Unit.Unit(name = '10x Sacresants',
                model_count = 5,
@@ -240,7 +244,8 @@ def initialize():
                armor = 3,
                invul = 4,
                keywords = {'INFANTRY'},
-               weapons =  {AP1_mace, AP2_mace, AP2_halberd, AP3_halberd})
+               weapons =  {AP1_mace, AP2_mace, AP2_halberd, AP3_halberd},
+               points = 150)
     
     arcosX10 = Unit.Unit(name = '10x Arcos',
                model_count = 10,
@@ -249,7 +254,8 @@ def initialize():
                armor = 7,
                invul = 6,
                keywords = {'INFANTRY'},
-               weapons =  {arco_flails})
+               weapons =  {arco_flails},
+               points = 150)
     
     mortifierX1 = Unit.Unit(name = '1x Mortifier',
                model_count = 1,
@@ -258,7 +264,8 @@ def initialize():
                armor = 3,
                invul = 6,
                keywords = {'INFANTRY'},
-               weapons =  {twin_buzz_blades})
+               weapons =  {twin_buzz_blades},
+               points = 70)
     
 
     # Defender defaults
