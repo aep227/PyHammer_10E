@@ -195,6 +195,23 @@ def initialize():
                     AP = -3,
                     damage = 2,
                     abilities = {'SUSTAINED HITS 1', 'TWIN-LINKED'})
+    
+    Immo_Meltas = Weapon.Weapon(name = 'Immo Meltas',
+                    count = 1,
+                    attacks = 2,
+                    skill = 3,
+                    strength = 10,
+                    AP = -4,
+                    damage = 'D6',
+                    abilities = {'TWIN-LINKED'})
+    Immo_Flamers = Weapon.Weapon(name = 'Immo Flamers',
+                    count = 1,
+                    attacks = '2D6',
+                    skill = 3,
+                    strength = 7,
+                    AP = -1,
+                    damage = 1,
+                    abilities = {'TORRENT', 'IGNORES COVER'})
 
     # Create units
     doms = Unit.Unit(name = '10x Dominions',
@@ -257,15 +274,15 @@ def initialize():
                weapons =  {arco_flails},
                points = 150)
     
-    mortifierX1 = Unit.Unit(name = '1x Mortifier',
+    immo = Unit.Unit(name = 'Immolator',
                model_count = 1,
-               toughness = 6,
-               wounds = 5,
+               toughness = 10,
+               wounds = 11,
                armor = 3,
                invul = 6,
-               keywords = {'INFANTRY'},
-               weapons =  {twin_buzz_blades},
-               points = 70)
+               keywords = {'VEHICLE'},
+               weapons =  {Immo_Flamers, Immo_Meltas},
+               points = 115)
     
 
     # Defender defaults
@@ -314,7 +331,7 @@ def initialize():
                keywords = {'VEHICLE', 'TITANIC'},
                weapons =  {})
 
-    attacker_list = [doms, rets, paragons, exorcist, sacsX10, arcosX10, mortifierX1]
+    attacker_list = [doms, rets, paragons, exorcist, sacsX10, arcosX10, immo]
     defender_list = [d_GEQ, d_MEQ, d_TEQ, d_VEQ, d_KEQ]
 
     return attacker_list, defender_list
