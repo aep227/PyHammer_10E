@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import AddAttackerWindow as AddAttackerWindowImport
 import AddWeaponWindow as AddWeaponWindowImport
+import AddDefenderWindow as AddDefenderWindowImport
 import data_manage as data_man
 import run_functions as run_func
 import threading
@@ -80,8 +81,12 @@ class RootWindow(tk.Tk):
                                                         command = lambda: data_man.remove_weapon(self.attacker_list, self.weapon_listbox, 
                                                                                                  self.G_SELECTED_ATTACKER.get(), self.G_SELECTED_WEAPON.get(),
                                                                                                  self.weapon_stats_listbox))
-        self.add_defender_unit_button = ttk.Button(self.db_function_frame, text = 'Add Defender Unit', style = 'default.TButton')
-        self.remove_defender_unit_button = ttk.Button(self.db_function_frame, text = 'Remove Defender Unit', style = 'default.TButton')
+        self.add_defender_unit_button = ttk.Button(self.db_function_frame, text = 'Add Defender Unit', style = 'default.TButton',
+                                                   command = lambda: AddDefenderWindowImport.AddDefenderWindow(self.defender_list, self.defender_listbox,
+                                                                                                               self.get_location_x(), self.get_location_y()))
+        self.remove_defender_unit_button = ttk.Button(self.db_function_frame, text = 'Remove Defender Unit', style = 'default.TButton',
+                                                      command = lambda: data_man.remove_defender_from_list(self.defender_list, self.defender_listbox,
+                                                                                                           self.defender_stats_listbox, self.G_SELECTED_DEFENDER.get()))
 
 
         # Calculation buttons
@@ -259,15 +264,15 @@ class RootWindow(tk.Tk):
 
     def defender_select(self, event, G_SELECTED_DEFENDER, defender_listbox, defender_list, defender_stats_listbox):
         if defender_listbox.curselection() != ():
-            G_SELECTED_DEFENDER = defender_listbox.curselection()[0]
+            G_SELECTED_DEFENDER.set(defender_listbox.curselection()[0])
 
             defender_stats_listbox.delete(0, tk.END)
-            defender_stats_listbox.insert('0', f'Model Count: {defender_list[G_SELECTED_DEFENDER].model_count}')
-            defender_stats_listbox.insert('1', f'T{defender_list[G_SELECTED_DEFENDER].toughness} {defender_list[G_SELECTED_DEFENDER].wounds}W')
-            defender_stats_listbox.insert('2', f'{defender_list[G_SELECTED_DEFENDER].armor}+/{defender_list[G_SELECTED_DEFENDER].invul}++')
+            defender_stats_listbox.insert('0', f'Model Count: {defender_list[G_SELECTED_DEFENDER.get()].model_count}')
+            defender_stats_listbox.insert('1', f'T{defender_list[G_SELECTED_DEFENDER.get()].toughness} {defender_list[G_SELECTED_DEFENDER.get()].wounds}W')
+            defender_stats_listbox.insert('2', f'{defender_list[G_SELECTED_DEFENDER.get()].armor}+/{defender_list[G_SELECTED_DEFENDER.get()].invul}++')
             defender_stats_listbox.insert('3', f'Keywords:')
             sub_index = 4
-            for keyword in defender_list[G_SELECTED_DEFENDER].keywords:
+            for keyword in defender_list[G_SELECTED_DEFENDER.get()].keywords:
                 defender_stats_listbox.insert(f'{sub_index}', f'{keyword}')
                 sub_index += 1
     # End defender_select()

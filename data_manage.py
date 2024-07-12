@@ -339,7 +339,16 @@ def update_weapon_listbox(attacker_list, weapon_listbox, selected_attacker):
 # End update_weapon_listbox()
 
 
-def add_attacker_to_list(attacker_list, attacker_listbox, name, model_count,toughness,
+def update_defender_listbox(defender_list, defender_listbox):
+    defender_listbox.delete('0', 'end')
+    index = 0
+    for defender in defender_list:
+        defender_listbox.insert(f'{index}', defender.name)
+        index += 1
+# End update_defender_listbox()
+
+
+def add_attacker_to_list(attacker_list, attacker_listbox, name, model_count, toughness,
                          wounds, armor, invul, abilities, keywords):
     attacker = Unit.Unit(name, model_count, toughness, wounds, armor, invul, abilities, keywords, weapons={})
 
@@ -373,11 +382,17 @@ def remove_weapon(attacker_list, weapon_listbox, selected_attacker, selected_wea
 # End remove_weapon()
 
 
-def add_defender():
-    pass
-# End add_defender()
+def add_defender_to_list(defender_list, defender_listbox, name, model_count, toughness,
+                         wounds, armor, invul, abilities, keywords):
+    defender = Unit.Unit(name, model_count, toughness, wounds, armor, invul, abilities, keywords, weapons={})
+
+    defender_list.append(defender)
+    update_defender_listbox(defender_list, defender_listbox)
+# End add_attacker_to_list()
 
 
-def remove_defender():
-    pass
-# End remove_defender()
+def remove_defender_from_list(defender_list, defender_listbox, defender_stats_listbox, selected_defender):
+    del defender_list[selected_defender]
+    defender_stats_listbox.delete('0', 'end')
+    update_defender_listbox(defender_list, defender_listbox)
+# End remove_defender_from_list()
