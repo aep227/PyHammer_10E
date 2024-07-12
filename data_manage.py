@@ -384,7 +384,12 @@ def remove_weapon(attacker_list, weapon_listbox, selected_attacker, selected_wea
 
 def add_defender_to_list(defender_list, defender_listbox, name, model_count, toughness,
                          wounds, armor, invul, abilities, keywords):
-    defender = Unit.Unit(name, model_count, toughness, wounds, armor, invul, abilities, keywords, weapons={})
+    # TO-DO: Make a more robust type checking thing here
+    if invul == '':
+        invul = None
+    else:
+        invul = int(invul)
+    defender = Unit.Unit(name, int(model_count), int(toughness), int(wounds), int(armor), invul, abilities, keywords, weapons={})
 
     defender_list.append(defender)
     update_defender_listbox(defender_list, defender_listbox)
